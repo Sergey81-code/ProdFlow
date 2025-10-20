@@ -1,5 +1,5 @@
 from uuid import UUID
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class Device(BaseModel):
@@ -9,8 +9,7 @@ class Device(BaseModel):
 
 
 class TundeModel(BaseModel):
-    class ConfigDict:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ShowDevice(TundeModel):

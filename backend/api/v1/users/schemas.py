@@ -1,5 +1,5 @@
 from uuid import UUID
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, ConfigDict, field_validator
 
 from api.core.exceptions import AppExceptions
 from config.validation import Validation
@@ -20,8 +20,7 @@ class User(BaseModel):
 
 
 class TundeModel(BaseModel):
-    class ConfigDict:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ShowUser(TundeModel):
@@ -47,7 +46,7 @@ class CreateUser(BaseModel):
     def validate_password(cls, value):
         pass_validation = validator.validate_password(value)
         if not pass_validation[0]:
-            raise AppExceptions.unauthorized_exception(pass_validation[1])
+            raise AppExceptions.bad_request_exception(pass_validation[1])
         return value
 
 
@@ -64,5 +63,5 @@ class UpdateUser(BaseModel):
     def validate_password(cls, value):
         pass_validation = validator.validate_password(value)
         if not pass_validation[0]:
-            raise AppExceptions.unauthorized_exception(pass_validation[1])
+            raise AppExceptions.bad_request_exception(pass_validation[1])
         return value

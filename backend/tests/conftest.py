@@ -15,28 +15,18 @@ from fastapi.testclient import TestClient
 from api.core.config import get_settings
 from db.session import get_session
 from main import app
-from tests.sql_queries import (
-    CREATE_FAKE_TABLE_OF_USERS,
-    QUERY_TO_DELETE_PROCESSES_PG,
-    QUERY_TO_UNBLOCKING_PROCCESS_PG,
-)
+
 from tests.testDAL import TestDAL
 
 
 settings = get_settings()
 
-CLEAN_TABLES = [
-    "book_authors",
-    "books",
-    "authors",
-    "book_copies",
-    "users",
-]
+CLEAN_TABLES = ["users", "roles", "devices"]
 
 VERSION_URL = "/v1"
-BOOK_URL = "/books"
-AUTHOR_URL = "/authors"
-BOOK_COPY_URL = "/book_copies"
+USER_URL = "/users"
+DEVICE_URL = "/devices"
+ROLE_URL = "/roles"
 
 
 @pytest.fixture(scope="session")
@@ -58,19 +48,12 @@ async def async_session_test():
     yield async_session
 
 
-@pytest.fixture(scope="session")
-async def create_fake_users_table(async_session_test):
-    async with async_session_test() as session:
-        await session.execute(sqlalchemy.text(CREATE_FAKE_TABLE_OF_USERS))
-        await session.commit()
-
-
 @pytest.fixture(scope="session", autouse=True)
-async def run_migrations(create_fake_users_table):
+async def run_migrations():
     alembic_ini_path = os.path.join(os.getcwd(), "tests", "alembic.ini")
     alembic_cfg = Config(alembic_ini_path)
 
-    command.upgrade(alembic_cfg, "head")
+    command.upgrade(alembic_cfg, "heads")
     yield
 
 
@@ -79,8 +62,6 @@ async def clean_tables(async_session_test):
     query = "TRUNCATE TABLE " + ",".join(CLEAN_TABLES) + " CASCADE;"
     async with async_session_test() as session:
         async with session.begin():
-            await session.execute(sqlalchemy.text(QUERY_TO_UNBLOCKING_PROCCESS_PG))
-            await session.execute(sqlalchemy.text(QUERY_TO_DELETE_PROCESSES_PG))
             await session.execute(sqlalchemy.text(query))
             await session.commit()
 
