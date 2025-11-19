@@ -1,4 +1,5 @@
 from fastapi import Depends
+
 from api.core.dependencies.repositories import (
     get_device_repository,
     get_role_repository,

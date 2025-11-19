@@ -1,12 +1,11 @@
+import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import uvicorn
-
 
 from api.core.config import get_settings
+from api.core.logging.handlers import log_router
 from api.core.logging.logging_middleware import LoggingMiddleware
 from api.core.routers import router
-from api.core.logging.handlers import log_router
 
 settings = get_settings()
 

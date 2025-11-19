@@ -1,10 +1,9 @@
 from fastapi import Depends, Query, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from api.core.exceptions import AppExceptions
-
-from utils.jwt import JWT
 
 from api.core.config import get_settings
+from api.core.exceptions import AppExceptions
+from utils.jwt import JWT
 
 settings = get_settings()
 
@@ -17,9 +16,8 @@ async def get_user_token(
 
 
 def permission_required(
-    required_permissions: list[str] = Query(None, include_in_schema=False)
+    required_permissions: list[str] = Query(None, include_in_schema=False),
 ):
-
     if not settings.ENABLE_PERMISSION_CHECK:
 
         async def skip_check_permission():

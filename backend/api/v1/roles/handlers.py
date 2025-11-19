@@ -1,4 +1,5 @@
 from uuid import UUID
+
 from fastapi import APIRouter, Depends
 
 from api.core.dependencies.jwt_access import permission_required
@@ -6,7 +7,6 @@ from api.core.dependencies.services import get_role_service
 from api.v1.roles.schemas import CreateRole, ShowRole, UpdateRole
 from api.v1.roles.service import RoleService
 from config.permissions import Permissions
-
 
 router = APIRouter()
 

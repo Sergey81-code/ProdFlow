@@ -1,5 +1,4 @@
 from typing import cast
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.core.exceptions import AppExceptions
 from api.v1.users.repo_interface import IUserRepository
@@ -9,7 +8,6 @@ from utils.jwt import JWT
 
 
 class AuthService:
-
     def __init__(self, repo: IUserRepository):
         self._repo: IUserRepository = repo
 

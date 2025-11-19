@@ -1,5 +1,6 @@
 from typing import Callable
 from uuid import UUID
+
 import asyncpg
 from sqlalchemy import Enum, Table
 
@@ -80,7 +81,7 @@ class TestDAL:
         if table is not None:
             obj = await self.auto_cast_enum_values(obj, table)
         columns = '"' + '", "'.join(obj.keys()) + '"'
-        value_placeholders = ", ".join([f"${i+1}" for i in range(len(obj))])
+        value_placeholders = ", ".join([f"${i + 1}" for i in range(len(obj))])
         values = tuple(obj.values())
         query = f"""
             INSERT INTO {tablename} ({columns})
@@ -97,7 +98,7 @@ class TestDAL:
         tsvector_field: str,
         tsvector_value: str,
     ) -> None:
-        tsvector_sql = f"to_tsvector('russian', $1)"
+        tsvector_sql = "to_tsvector('russian', $1)"
         query = f"""
             UPDATE {tablename}
             SET {tsvector_field} = {tsvector_sql}

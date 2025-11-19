@@ -152,7 +152,6 @@ async def test_create_role_validation(
 
 
 async def test_create_role_super_admin_not_allowed(client, get_project_settings):
-
     settings = await get_project_settings()
     role_info = {
         "name": settings.SUPER_ROLE_NAME,

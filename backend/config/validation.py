@@ -1,5 +1,3 @@
-import re
-
 from config.validations.password_validation import PasswordValidation
 
 

@@ -1,10 +1,11 @@
 from uuid import UUID
+
 from api.core.config import get_settings
 from api.core.exceptions import AppExceptions
 from api.v1.roles.repo_interface import IRoleRepository
 from api.v1.roles.schemas import Role
-from api.v1.users.schemas import CreateUser, User
 from api.v1.users.repo_interface import IUserRepository
+from api.v1.users.schemas import CreateUser, User
 from db.db_exceptions import DBException
 from utils.hashing import Hasher
 
@@ -31,7 +32,6 @@ class UserService:
 
     async def create_user_in_database(self, user_info: CreateUser) -> User:
         try:
-
             if (
                 await self._repo.get_by_username(
                     user_info.username, exact_match=True, case_sensitive=False
@@ -67,7 +67,7 @@ class UserService:
             )
             if not (user_info := body.model_dump(exclude_none=True)):
                 raise AppExceptions.validation_exception(
-                    f"At least one parameter must be defined"
+                    "At least one parameter must be defined"
                 )
             if (
                 user_info.get("username", None)
@@ -77,7 +77,7 @@ class UserService:
                 != []
             ):
                 raise AppExceptions.bad_request_exception(
-                    f"User with username {user_info["username"]} already exists"
+                    f"User with username {user_info['username']} already exists"
                 )
             roles: list[Role] = await self._role_repo.get_all()
             user_role_names = [role.name for role in roles if role.id in user.role_ids]

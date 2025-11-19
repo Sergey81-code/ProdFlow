@@ -5,7 +5,6 @@ from api.v1.devices.schemas import CreateDevice, Device, UpdateDevice
 
 
 class IDeviceRepository(ABC):
-
     @abstractmethod
     async def get_by_id(self, id: UUID) -> Device | None:
         pass

@@ -1,5 +1,4 @@
-from pydantic import BaseModel, Field
-from pydantic import field_validator
+from pydantic import BaseModel, Field, field_validator
 
 from api.core.exceptions import AppExceptions
 from config.validation import Validation

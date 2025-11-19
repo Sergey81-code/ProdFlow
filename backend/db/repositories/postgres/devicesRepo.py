@@ -1,11 +1,11 @@
 from uuid import UUID
 
-from sqlalchemy import func, select, update, delete
+from sqlalchemy import delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.v1.devices.repo_interface import IDeviceRepository
+from api.v1.devices.schemas import CreateDevice, Device, UpdateDevice
 from db.models import Device as DeviceModel
-from api.v1.devices.schemas import CreateDevice, UpdateDevice, Device
 
 
 class PostgresDeviceRepo(IDeviceRepository):
@@ -50,7 +50,6 @@ class PostgresDeviceRepo(IDeviceRepository):
         exact_match: bool = False,
         case_sensitive: bool = False,
     ) -> list[Device]:
-
         if exact_match:
             pattern = name
             filter_expr = (

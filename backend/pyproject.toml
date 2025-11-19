@@ -26,20 +26,20 @@ dependencies = [
     "uvicorn>=0.34.0",
 ]
 
+[tool.black]
+line-length = 88
+target-version = ['py312']
+
 [tool.ruff]
-src = ["backend", "tests"]        # Пути к исходникам
-line-length = 88                  # Максимальная длина строки
-target-version = "py312"          # Python 3.12
+line-length = 200
+target-version = "py312"
 
 [tool.ruff.lint]
-select = ["I", "F", "E"]          # I = импорт, F = Pyflakes, E = pycodestyle
-fixable = ["I", "F", "E"]         # Автофикс для импортов и прочих ошибок
-per-file-ignores = [
-    "db/migrations/env.py:E402"  # Игнорируем E402 только в этом файле
-]
+select = ["I", "F", "E"]
+fixable = ["I", "F", "E"]
 
 [tool.isort]
-profile = "black"   # Совместимый стиль с Black
-line_length = 88
+profile = "black"
+line_length = 200
 multi_line_output = 3
 include_trailing_comma = true

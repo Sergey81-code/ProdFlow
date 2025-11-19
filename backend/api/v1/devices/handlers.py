@@ -1,4 +1,5 @@
 from uuid import UUID
+
 from fastapi import APIRouter, Depends
 
 from api.core.dependencies.jwt_access import permission_required
@@ -6,7 +7,6 @@ from api.core.dependencies.services import get_device_service
 from api.v1.devices.schemas import CreateDevice, ShowDevice, UpdateDevice
 from api.v1.devices.service import DeviceService
 from config.permissions import Permissions
-
 
 router = APIRouter()
 

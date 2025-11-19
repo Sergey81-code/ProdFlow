@@ -1,10 +1,10 @@
 import datetime
 from uuid import uuid4
+
 from jose import jwt
 
 from api.core.config import get_settings
 from config.permissions import Permissions
-
 
 settings = get_settings()
 

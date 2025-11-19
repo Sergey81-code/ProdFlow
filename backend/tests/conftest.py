@@ -1,21 +1,19 @@
 import os
 from typing import Any, AsyncGenerator, Callable
 from uuid import UUID
+
 import pytest
 import sqlalchemy
-from sqlalchemy.ext.asyncio import create_async_engine
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import sessionmaker
 from alembic import command
 from alembic.config import Config
 from fastapi.testclient import TestClient
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import sessionmaker
 
 from api.core.config import get_settings
 from db.session import get_session
 from main import app
-
 from tests.testDAL import TestDAL
-
 
 settings = get_settings()
 
@@ -158,7 +156,7 @@ async def create_user_in_database() -> Callable[[dict[str | list[dict[str]]]], s
     async def create_user_in_database(user_info: dict) -> str:
         async with TestDAL(DSN_FOR_TESTDAL) as dal:
             user_id = await dal.create_object_in_database("users", user_info)
-            full_name = f"{user_info.get("first_name", "")} {user_info.get("last_name", "")} {user_info.get("patronymic", '')}"
+            full_name = f"{user_info.get('first_name', '')} {user_info.get('last_name', '')} {user_info.get('patronymic', '')}"
             await dal.add_tsvector_to_obj("users", user_id, "full_name_tsv", full_name)
             return user_id
 

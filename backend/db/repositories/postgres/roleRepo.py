@@ -1,11 +1,10 @@
 from uuid import UUID
 
-from sqlalchemy import func, select, update, delete
+from sqlalchemy import delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.v1.roles.repo_interface import IRoleRepository
-from api.v1.roles.schemas import CreateRole, UpdateRole, Role
-
+from api.v1.roles.schemas import CreateRole, Role, UpdateRole
 from db.models import Role as RoleDb
 
 

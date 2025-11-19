@@ -1,5 +1,7 @@
-import pytest
 from uuid import uuid4
+
+import pytest
+
 from config.permissions import Permissions
 from tests.conftest import ROLE_URL, VERSION_URL
 from tests.utils_for_tests import _create_roles, create_auth_headers_for_user

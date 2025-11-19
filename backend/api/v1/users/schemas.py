@@ -1,8 +1,8 @@
 from uuid import UUID
+
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from config.validation import Validation
-
 
 validator = Validation()
 

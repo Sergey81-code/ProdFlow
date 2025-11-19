@@ -2,8 +2,7 @@ import asyncio
 import os
 import sys
 
-from sqlalchemy import delete
-from sqlalchemy import select
+from sqlalchemy import delete, select
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 

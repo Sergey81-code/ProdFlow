@@ -1,8 +1,6 @@
 from unittest.mock import ANY, AsyncMock, patch
-from uuid import uuid4
 
 import pytest
-
 
 from scripts.create_superadmin import (
     prompt_for_superadmin_credentials,
@@ -52,9 +50,10 @@ async def test_prompt_passwords_do_not_match(mock_input, mock_getpass):
 
 
 async def test_prompt_exit():
-    with patch("builtins.input", side_effect=["exit"]), patch(
-        "sys.exit", side_effect=SystemExit(0)
-    ) as mock_exit:
+    with (
+        patch("builtins.input", side_effect=["exit"]),
+        patch("sys.exit", side_effect=SystemExit(0)) as mock_exit,
+    ):
         with pytest.raises(SystemExit):
             await prompt_for_superadmin_credentials()
         mock_exit.assert_called_once_with(0)

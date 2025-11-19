@@ -2,13 +2,12 @@ from unittest.mock import patch
 from uuid import uuid4
 
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import sessionmaker
 
 from config.permissions import Permissions
 from db.models import User
 from scripts.delete_superadmin import delete_superadmin
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.asyncio import create_async_engine
 
 
 async def test_delete_superadmin(

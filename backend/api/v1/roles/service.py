@@ -1,4 +1,5 @@
 from uuid import UUID
+
 from api.core.config import get_settings
 from api.core.exceptions import AppExceptions
 from api.v1.roles.repo_interface import IRoleRepository
@@ -42,7 +43,6 @@ class RoleService:
 
     async def update_role(self, role: Role, body: CreateRole) -> Role:
         try:
-
             if role.name.lower() == settings.SUPER_ROLE_NAME.lower():
                 raise AppExceptions.forbidden_exception(
                     "Super role is not allowed to perform this action"

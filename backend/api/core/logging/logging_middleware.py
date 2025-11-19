@@ -1,5 +1,5 @@
-import time
 import json
+import time
 from typing import Callable
 from urllib.parse import parse_qsl, urlencode
 
@@ -12,7 +12,6 @@ MAX_BODY_LOG_SIZE = 10 * 1024 * 1024
 
 
 class LoggingMiddleware(BaseHTTPMiddleware):
-
     SECRET_FIELDS = {
         "password",
         "token",

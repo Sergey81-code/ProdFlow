@@ -1,4 +1,5 @@
 from uuid import UUID
+
 from api.core.exceptions import AppExceptions
 from api.v1.devices.repo_interface import IDeviceRepository
 from api.v1.devices.schemas import CreateDevice, Device
@@ -29,7 +30,7 @@ class DeviceService:
                 raise AppExceptions.bad_request_exception(
                     f"Device with name {device_info.name} already exists"
                 )
-            if await self._repo.get_by_android_id(device_info.android_id) != None:
+            if await self._repo.get_by_android_id(device_info.android_id) is not None:
                 raise AppExceptions.bad_request_exception(
                     f"Device with android_id {device_info.android_id} already exists"
                 )
@@ -54,10 +55,10 @@ class DeviceService:
                 )
             if (
                 body.android_id
-                and await self._repo.get_by_android_id(body.android_id) != None
+                and await self._repo.get_by_android_id(body.android_id) is not None
             ):
                 raise AppExceptions.bad_request_exception(
-                    f"Device with this android_id already exists"
+                    "Device with this android_id already exists"
                 )
             return await self._repo.update(device, body)
         except DBException:

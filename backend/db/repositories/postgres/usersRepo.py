@@ -1,12 +1,12 @@
 from uuid import UUID
 
-from sqlalchemy import or_, select, update, delete, func
+from sqlalchemy import delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.v1.users.repo_interface import IUserRepository
 from api.v1.users.schemas import CreateUser, UpdateUser, User
-
-from db.models import Role, User as UserDb
+from db.models import Role
+from db.models import User as UserDb
 from db.repositories.postgres.utils import escape_tsquery
 
 

@@ -5,7 +5,6 @@ from api.v1.roles.schemas import CreateRole, Role, UpdateRole
 
 
 class IRoleRepository(ABC):
-
     @abstractmethod
     async def get_by_id(self, id: UUID) -> Role | None:
         pass

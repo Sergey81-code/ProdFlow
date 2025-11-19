@@ -1,14 +1,14 @@
 import datetime
+
 from jose import JWTError, jwt
+
 from api.core.config import get_settings
 from api.core.exceptions import AppExceptions
-
 
 settings = get_settings()
 
 
 class JWT:
-
     @staticmethod
     async def create_jwt_token(
         data: dict,

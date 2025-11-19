@@ -5,7 +5,6 @@ from api.v1.users.schemas import CreateUser, UpdateUser, User
 
 
 class IUserRepository(ABC):
-
     @abstractmethod
     async def get_by_id(self, id: UUID) -> User | None:
         pass

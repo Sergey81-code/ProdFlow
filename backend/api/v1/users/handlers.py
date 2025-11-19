@@ -1,14 +1,12 @@
-from fastapi import APIRouter
-
 from uuid import UUID
-from fastapi import Depends
+
+from fastapi import APIRouter, Depends
 
 from api.core.dependencies.jwt_access import permission_required
 from api.core.dependencies.services import get_user_service
 from api.v1.users.schemas import CreateUser, ShowUser, UpdateUser
 from api.v1.users.service import UserService
 from config.permissions import Permissions
-
 
 router = APIRouter()
 

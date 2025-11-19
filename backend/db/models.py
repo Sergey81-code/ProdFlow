@@ -1,9 +1,10 @@
 import uuid
-from sqlalchemy import ARRAY, ForeignKey, Index, String, JSON
-from sqlalchemy.dialects.postgresql import UUID, TSVECTOR
-from uuid_extensions import uuid7
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from typing import Annotated
+
+from sqlalchemy import ARRAY, Index, String
+from sqlalchemy.dialects.postgresql import TSVECTOR, UUID
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from uuid_extensions import uuid7
 
 
 class Base(DeclarativeBase):

@@ -1,5 +1,7 @@
-import pytest
 from uuid import uuid4
+
+import pytest
+
 from config.permissions import Permissions
 from tests.conftest import USER_URL, VERSION_URL
 from tests.utils_for_tests import create_auth_headers_for_user
@@ -64,7 +66,6 @@ async def test_update_user(
 async def test_update_user_role_change_success(
     client, create_user_in_database, create_role_in_database, get_user_from_database
 ):
-
     rid_old = uuid4()
     rid_new = uuid4()
 
@@ -265,7 +266,6 @@ async def test_update_user_invalid_role_ids_type(client, create_user_in_database
 
 
 async def test_update_user_sql_injection(client, create_user_in_database):
-
     user_id = await create_user_in_database(
         {
             "id": uuid4(),
@@ -328,7 +328,6 @@ async def test_update_user_all_validation_errors(
     expected_error_fragment,
     create_user_in_database,
 ):
-
     user_id = await create_user_in_database(
         {
             "id": uuid4(),

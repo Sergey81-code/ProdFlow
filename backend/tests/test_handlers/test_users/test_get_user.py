@@ -1,11 +1,13 @@
-import pytest
 from uuid import uuid4
+
+import pytest
+
 from config.permissions import Permissions
 from tests.conftest import USER_URL, VERSION_URL
 from tests.utils_for_tests import (
-    create_auth_headers_for_user,
-    _create_users,
     _create_roles,
+    _create_users,
+    create_auth_headers_for_user,
 )
 
 
@@ -85,7 +87,6 @@ async def test_get_user_unauthorized(
 async def test_get_user_bad_token(
     client, create_user_in_database, get_project_settings
 ):
-
     user_id = uuid4()
     await create_user_in_database(
         {"id": user_id, "username": "john", "first_name": "John", "last_name": "Doe"}

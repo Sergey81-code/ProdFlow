@@ -1,6 +1,7 @@
 import datetime
-import pytest
 from uuid import uuid4
+
+import pytest
 from jose import jwt
 
 from config.permissions import Permissions
@@ -106,7 +107,6 @@ async def test_login_response_shape(
     user_data,
     get_project_settings,
 ):
-
     role_info1 = {
         "id": uuid4(),
         "name": "employee",
