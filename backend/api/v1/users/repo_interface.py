@@ -4,10 +4,10 @@ from uuid import UUID
 from api.v1.users.schemas import CreateUser, UpdateUser, User
 
 
-class UserRepoInterface(ABC):
+class IUserRepository(ABC):
 
     @abstractmethod
-    async def get_by_id(self, id: UUID) -> User:
+    async def get_by_id(self, id: UUID) -> User | None:
         pass
 
     @abstractmethod
@@ -23,7 +23,15 @@ class UserRepoInterface(ABC):
         pass
 
     @abstractmethod
-    async def get_by_name(self, name: str) -> list[User]:
+    async def get_by_username(
+        self, name: str, exact_match: bool = False, case_sensitive: bool = False
+    ) -> list[User]:
+        pass
+
+    @abstractmethod
+    async def get_by_person_name_fields(
+        self, name: str, exact_match: bool = False, case_sensitive: bool = False
+    ) -> list[User]:
         pass
 
     @abstractmethod

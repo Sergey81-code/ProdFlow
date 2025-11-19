@@ -5,7 +5,7 @@ class AppExceptions:
 
     @staticmethod
     def _raise_exception(status_code: int, message: str):
-        return HTTPException(status_code=status_code, detail=message)
+        raise HTTPException(status_code=status_code, detail=message)
 
     @classmethod
     def bad_request_exception(cls, message: str):

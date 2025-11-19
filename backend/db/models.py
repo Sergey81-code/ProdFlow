@@ -1,9 +1,9 @@
 import uuid
 from sqlalchemy import ARRAY, ForeignKey, Index, String, JSON
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import UUID, TSVECTOR
 from uuid_extensions import uuid7
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
-from typing import Annotated, Optional
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from typing import Annotated
 
 
 class Base(DeclarativeBase):
@@ -34,7 +34,13 @@ class User(Base):
     password: Mapped[str] = mapped_column(String(100), nullable=True)
     finger_token: Mapped[str] = mapped_column(String(100), nullable=True)
     role_ids: Mapped[list[uuid.UUID]] = mapped_column(
-        ARRAY(UUID(as_uuid=True)), default=list
+        ARRAY(UUID(as_uuid=True)), default=list, nullable=True
+    )
+
+    full_name_tsv: Mapped[str] = mapped_column(TSVECTOR, nullable=True)
+
+    __table_args__ = (
+        Index("idx_users_full_name_tsv", "full_name_tsv", postgresql_using="gin"),
     )
 
 
@@ -42,7 +48,7 @@ class Device(Base):
     __tablename__ = "devices"
 
     id: Mapped[uuid_pk]
-    name: Mapped[str]
+    name: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
     android_id: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
 
     __table_args__ = (

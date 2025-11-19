@@ -6,14 +6,17 @@ from getpass import getpass
 
 from sqlalchemy import select
 
-
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from uuid import uuid4
 from db.models import Role, User
 from db.session import get_session
 from utils.hashing import Hasher
-from config.permissions import Premissions
+from config.permissions import Permissions
+
+from api.core.config import get_settings
+
+settings = get_settings()
 
 
 def get_password(message):
@@ -88,15 +91,17 @@ async def prompt_for_superadmin_credentials():
 
 async def create_superadmin(username, password, name, surname, session):
     """Create a superadmin in the database"""
-    super_role_id_or_none = await check_creation_super_role("super_role", session)
+    super_role_id_or_none = await check_creation_super_role(
+        settings.SUPER_ROLE_NAME, session
+    )
 
     async with session.begin():
 
         if super_role_id_or_none is None:
             new_super_role = Role(
                 id=uuid4(),
-                name="super_role",
-                permissions=[permission for permission in Premissions],
+                name=settings.SUPER_ROLE_NAME,
+                permissions=[permission for permission in Permissions],
             )
             try:
                 session.add(new_super_role)

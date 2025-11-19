@@ -22,6 +22,10 @@ class Settings(BaseSettings):
     ENABLE_PERMISSION_CHECK: bool = True
     TOKEN_EXPIRE_MINUTES: int = 60 * 23
 
+    FRONTEND_ORIGINS: str
+
+    SUPER_ROLE_NAME: str = "super_role"
+
     model_config = ConfigDict(env_file="config/.env", env_file_encoding="utf-8")
 
 

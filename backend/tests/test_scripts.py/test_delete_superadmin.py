@@ -3,29 +3,54 @@ from uuid import uuid4
 
 from sqlalchemy import select
 
+from config.permissions import Permissions
 from db.models import User
 from scripts.delete_superadmin import delete_superadmin
-from utils.hashing import Hasher
-from utils.roles import PortalRole
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.asyncio import create_async_engine
 
 
-async def test_delete_superadmin(async_session_test, create_user_in_database):
+async def test_delete_superadmin(
+    async_session_test,
+    create_user_in_database,
+    create_role_in_database,
+    get_project_settings,
+):
+    settings = await get_project_settings()
+    role_id = uuid4()
+    await create_role_in_database(
+        {
+            "id": role_id,
+            "name": settings.SUPER_ROLE_NAME,
+            "permissions": [permission for permission in Permissions],
+        }
+    )
+
     user_data = {
-        "user_id": uuid4(),
-        "email": "test@example.com",
-        "password": "StrongPass1!",
-        "name": "Super",
-        "surname": "Admin",
-        "is_active": True,
-        "roles": [PortalRole.ROLE_PORTAL_SUPERADMIN],
+        "id": uuid4(),
+        "username": "johndoe",
+        "first_name": "John",
+        "last_name": "Doe",
+        "patronymic": "Martin",
+        "finger_token": "some_token123",
+        "password": "StrongPass123!",
+        "role_ids": [str(role_id)],
     }
 
     await create_user_in_database(user_data)
 
-    async with async_session_test() as session:
-        await delete_superadmin(user_data["email"], session)
+    engine = create_async_engine(settings.TEST_DATABASE_URL, future=True, echo=True)
+    AsyncSessionMaker = sessionmaker(
+        engine, class_=AsyncSession, expire_on_commit=False
+    )
 
-        result = await session.execute(select(User))
+    async with AsyncSessionMaker() as isolated_session:
+        await delete_superadmin(user_data["username"], isolated_session)
+
+        result = await isolated_session.execute(
+            select(User).where(User.username == user_data["username"])
+        )
 
         users = result.scalars().all()
 
@@ -33,33 +58,56 @@ async def test_delete_superadmin(async_session_test, create_user_in_database):
 
 
 async def test_delete_superadmin_email_not_found(
-    async_session_test, create_user_in_database, get_user_from_database
+    async_session_test,
+    create_role_in_database,
+    create_user_in_database,
+    get_user_from_database,
+    get_project_settings,
 ):
-    user_data = {
-        "user_id": uuid4(),
-        "email": "test@example.com",
-        "password": "StrongPass1!",
-        "name": "Super",
-        "surname": "Admin",
-        "is_active": True,
-        "roles": [PortalRole.ROLE_PORTAL_SUPERADMIN],
-    }
+    settings = await get_project_settings()
+    role_id = uuid4()
+    await create_role_in_database(
+        {
+            "id": role_id,
+            "name": settings.SUPER_ROLE_NAME,
+            "permissions": [permission for permission in Permissions],
+        }
+    )
 
+    user_data = {
+        "id": uuid4(),
+        "username": "johndoe",
+        "first_name": "John",
+        "last_name": "Doe",
+        "patronymic": "Martin",
+        "finger_token": "some_token123",
+        "password": "StrongPass123!",
+        "role_ids": [str(role_id)],
+    }
     await create_user_in_database(user_data)
 
-    email_not_exists = "nonexistent@example.com"
+    username_not_exists = "nonexistent@example.com"
 
-    async with async_session_test() as session:
+    engine = create_async_engine(settings.TEST_DATABASE_URL, future=True, echo=True)
+    AsyncSessionMaker = sessionmaker(
+        engine, class_=AsyncSession, expire_on_commit=False
+    )
+
+    async with AsyncSessionMaker() as isolated_session:
         with patch("builtins.print") as mock_print:
-            await delete_superadmin(email_not_exists, session)
-            mock_print.assert_any_call("Error: A user with this email does not exist.")
+            await delete_superadmin(username_not_exists, isolated_session)
+            mock_print.assert_any_call(
+                "Error: A user with this username does not exist."
+            )
 
-    resp_data = (await get_user_from_database(user_data["user_id"]))[0]
+    user_from_db = await get_user_from_database(user_data["id"])
 
-    assert resp_data["user_id"] == user_data["user_id"]
-    assert resp_data["name"] == user_data["name"]
-    assert resp_data["surname"] == user_data["surname"]
-    assert resp_data["email"] == user_data["email"]
-    assert resp_data["is_active"] is user_data["is_active"]
-    assert Hasher.verify_password(user_data["password"], resp_data["hashed_password"])
-    assert resp_data["roles"] == user_data["roles"]
+    assert user_from_db["id"] == user_data["id"]
+    assert user_from_db["first_name"] == user_data["first_name"]
+    assert user_from_db["last_name"] == user_data["last_name"]
+    assert user_from_db["patronymic"] == user_data["patronymic"]
+    assert user_from_db["finger_token"] == user_data["finger_token"]
+    assert user_from_db["password"] == user_data["password"]
+    assert [str(role_id) for role_id in user_from_db["role_ids"]] == user_data[
+        "role_ids"
+    ]

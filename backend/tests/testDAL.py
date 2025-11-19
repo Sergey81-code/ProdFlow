@@ -7,15 +7,24 @@ from db.models import Base
 
 
 class TestDAL:
-    def __init__(self, asyncpg_pool: asyncpg.Pool):
-        self.pool = asyncpg_pool
+    def __init__(self, dsn: str):
+        self.dsn = dsn
+        self.pool: asyncpg.Pool | None = None
+
+    async def __aenter__(self):
+        self.pool = await asyncpg.create_pool(self.dsn)
+        return self
+
+    async def __aexit__(self, exc_type, exc, tb):
+        if self.pool:
+            await self.pool.close()
 
     async def get_obj_from_database_by_id(
         self, tablename: str, obj_id: UUID
     ) -> asyncpg.Record | None:
         query = f"""
             SELECT * FROM {tablename}
-            WHERE id = $1 
+            WHERE id = $1
         """
         async with self.pool.acquire() as connection:
             return await connection.fetchrow(query, obj_id)
@@ -80,3 +89,19 @@ class TestDAL:
         """
         async with self.pool.acquire() as connection:
             return await connection.fetchval(query, *values)
+
+    async def add_tsvector_to_obj(
+        self,
+        tablename: str,
+        obj_id: str | int,
+        tsvector_field: str,
+        tsvector_value: str,
+    ) -> None:
+        tsvector_sql = f"to_tsvector('russian', $1)"
+        query = f"""
+            UPDATE {tablename}
+            SET {tsvector_field} = {tsvector_sql}
+            WHERE id = $2
+        """
+        async with self.pool.acquire() as connection:
+            await connection.execute(query, tsvector_value, obj_id)

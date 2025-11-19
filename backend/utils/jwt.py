@@ -11,7 +11,9 @@ class JWT:
 
     @staticmethod
     async def create_jwt_token(
-        data: dict, token_type: str, expires_delta: datetime.timedelta | None = None
+        data: dict,
+        token_type: str = "access",
+        expires_delta: datetime.timedelta | None = None,
     ) -> str:
         if token_type == "access":
             token_key = settings.SECRET_KEY_FOR_ACCESS

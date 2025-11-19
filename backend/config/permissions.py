@@ -1,7 +1,7 @@
 from enum import StrEnum
 
 
-class Premissions(StrEnum):
+class Permissions(StrEnum):
     CREATE_ROLE = "create_role"
     DELETE_ROLE = "delete_role"
     GET_ROLES = "get_roles"
@@ -16,3 +16,5 @@ class Premissions(StrEnum):
     DELETE_USER = "delete_user"
     GET_USERS = "get_users"
     UPDATE_USER = "update_user"
+
+    GET_LOGS = "get_logs"

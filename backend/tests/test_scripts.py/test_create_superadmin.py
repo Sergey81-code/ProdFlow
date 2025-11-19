@@ -2,11 +2,9 @@ from unittest.mock import ANY, AsyncMock, patch
 from uuid import uuid4
 
 import pytest
-from scripts.create_superadmin import create_superadmin, Hasher, Premissions, User, Role
 
 
 from scripts.create_superadmin import (
-    create_superadmin,
     prompt_for_superadmin_credentials,
 )
 

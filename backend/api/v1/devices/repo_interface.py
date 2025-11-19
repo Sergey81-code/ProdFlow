@@ -4,10 +4,10 @@ from uuid import UUID
 from api.v1.devices.schemas import CreateDevice, Device, UpdateDevice
 
 
-class DeviceRepoInterface(ABC):
+class IDeviceRepository(ABC):
 
     @abstractmethod
-    async def get_by_id(self, id: UUID) -> Device:
+    async def get_by_id(self, id: UUID) -> Device | None:
         pass
 
     @abstractmethod
@@ -23,7 +23,9 @@ class DeviceRepoInterface(ABC):
         pass
 
     @abstractmethod
-    async def get_by_name(self, name: str) -> list[Device]:
+    async def get_by_name(
+        self, name: str, exact_match: bool = False, case_sensitive: bool = False
+    ) -> list[Device]:
         pass
 
     @abstractmethod
@@ -31,5 +33,5 @@ class DeviceRepoInterface(ABC):
         pass
 
     @abstractmethod
-    async def get_by_android_id(self, android_id: UUID) -> Device:
+    async def get_by_android_id(self, android_id: str) -> Device | None:
         pass

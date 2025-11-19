@@ -20,7 +20,7 @@ def permission_required(
     required_permissions: list[str] = Query(None, include_in_schema=False)
 ):
 
-    if settings.ENABLE_PERMISSION_CHECK == False:
+    if not settings.ENABLE_PERMISSION_CHECK:
 
         async def skip_check_permission():
             return

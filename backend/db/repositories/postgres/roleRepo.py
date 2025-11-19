@@ -1,15 +1,15 @@
 from uuid import UUID
 
-from sqlalchemy import select, update, delete
+from sqlalchemy import func, select, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.v1.roles.repo_interface import RoleRepoInterface
+from api.v1.roles.repo_interface import IRoleRepository
 from api.v1.roles.schemas import CreateRole, UpdateRole, Role
 
 from db.models import Role as RoleDb
 
 
-class PostgresRoleRepo(RoleRepoInterface):
+class PostgresRoleRepo(IRoleRepository):
     def __init__(self, session: AsyncSession):
         self._session = session
 
@@ -45,8 +45,25 @@ class PostgresRoleRepo(RoleRepoInterface):
         deleted_id = result.scalar_one_or_none()
         return deleted_id
 
-    async def get_by_name(self, name: str) -> list[Role]:
-        stmt = select(RoleDb).where(RoleDb.name.ilike(f"%{name}%"))
+    async def get_by_name(
+        self, name: str, exact_match: bool = False, case_sensitive: bool = False
+    ) -> list[Role]:
+        if exact_match:
+            pattern = name
+            filter_expr = (
+                RoleDb.name == pattern
+                if case_sensitive
+                else func.lower(RoleDb.name) == pattern.lower()
+            )
+        else:
+            pattern = f"%{name}%"
+            filter_expr = (
+                RoleDb.name.like(pattern)
+                if case_sensitive
+                else RoleDb.name.ilike(pattern)
+            )
+
+        stmt = select(RoleDb).where(filter_expr)
         result = await self._session.execute(stmt)
         roles = result.scalars().all()
         return [Role.model_validate(r) for r in roles]

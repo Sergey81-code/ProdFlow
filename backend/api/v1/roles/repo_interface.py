@@ -4,10 +4,10 @@ from uuid import UUID
 from api.v1.roles.schemas import CreateRole, Role, UpdateRole
 
 
-class RoleRepoInterface(ABC):
+class IRoleRepository(ABC):
 
     @abstractmethod
-    async def get_by_id(self, id: UUID) -> Role:
+    async def get_by_id(self, id: UUID) -> Role | None:
         pass
 
     @abstractmethod
@@ -23,7 +23,9 @@ class RoleRepoInterface(ABC):
         pass
 
     @abstractmethod
-    async def get_by_name(self, name: str) -> list[Role]:
+    async def get_by_name(
+        self, name: str, exact_match: bool = False, case_sensitive: bool = False
+    ) -> list[Role]:
         pass
 
     @abstractmethod
