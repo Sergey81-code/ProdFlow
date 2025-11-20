@@ -82,8 +82,8 @@ async def prompt_for_superadmin_credentials():
             break
         print("Passwords do not match")
 
-    name = input("Enter name (default: 'Super'): ").strip() or "Super"
-    surname = input("Enter surname (default: 'Admin'): ").strip() or "Admin"
+    name = input("Enter name (default: 'Admin'): ").strip() or "Admin"
+    surname = input("Enter surname (default: 'Super'): ").strip() or "Super"
 
     async for session in get_session():
         await create_superadmin(username, password, name, surname, session)
