@@ -50,6 +50,7 @@ class RoleService:
 
             if (
                 body.name
+                and body.name != role.name
                 and await self._repo.get_by_name(
                     body.name, exact_match=True, case_sensitive=False
                 )

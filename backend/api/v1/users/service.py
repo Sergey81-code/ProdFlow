@@ -71,6 +71,7 @@ class UserService:
                 )
             if (
                 user_info.get("username", None)
+                and user_info["username"] != user.username
                 and await self._repo.get_by_username(
                     user_info["username"], exact_match=True, case_sensitive=False
                 )

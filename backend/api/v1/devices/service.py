@@ -44,17 +44,22 @@ class DeviceService:
                 raise AppExceptions.validation_exception(
                     "At least one parameter must be defined"
                 )
-            if body.name and (
-                await self._repo.get_by_name(
-                    body.name, exact_match=True, case_sensitive=False
+            if (
+                body.name
+                and body.name != device.name
+                and (
+                    await self._repo.get_by_name(
+                        body.name, exact_match=True, case_sensitive=False
+                    )
+                    != []
                 )
-                != []
             ):
                 raise AppExceptions.bad_request_exception(
                     f"Device with name {body.name} already exists."
                 )
             if (
                 body.android_id
+                and body.android_id != device.android_id
                 and await self._repo.get_by_android_id(body.android_id) is not None
             ):
                 raise AppExceptions.bad_request_exception(
