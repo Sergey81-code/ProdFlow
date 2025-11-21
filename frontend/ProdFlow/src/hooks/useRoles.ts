@@ -1,8 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getRoles, createRole, updateRole, deleteRole } from "../api";
-import { RoleCreateDto, RoleDto } from "../types/role";
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-const ROLES_KEY = ["roles"];
+import { createRole, deleteRole,getRoles, updateRole } from '../api';
+import { RoleCreateDto, RoleDto } from '../types/role';
+
+const ROLES_KEY = ['roles'];
 
 export const useRoles = () => {
   const qc = useQueryClient();
@@ -19,8 +20,13 @@ export const useRoles = () => {
   });
 
   const update = useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: Partial<RoleCreateDto> }) =>
-      updateRole(id, payload),
+    mutationFn: ({
+      id,
+      payload,
+    }: {
+      id: string;
+      payload: Partial<RoleCreateDto>;
+    }) => updateRole(id, payload),
     onSuccess: () => qc.invalidateQueries({ queryKey: ROLES_KEY }),
   });
 

@@ -1,6 +1,7 @@
-import React from "react";
-import { Layout } from "antd";
-import ProdFlowButton from "../../components/ui/Button";
+import { Layout } from 'antd';
+import React from 'react';
+
+import ProdFlowButton from '../../components/ui/Button';
 
 const { Footer } = Layout;
 
@@ -12,13 +13,13 @@ const PageFooter: React.FC<Props> = ({ onShowLogs }) => {
   return (
     <Footer
       style={{
-        display: "flex",
-        justifyContent: "flex-end",
-        alignItems: "center",
-        padding: "12px 24px",
-        background: "linear-gradient(90deg, #FFD8A8 0%, #FFB347 100%)",
-        boxShadow: "0 -2px 8px rgba(0,0,0,0.08)",
-        flexWrap: "wrap",
+        display: 'flex',
+        justifyContent: 'flex-end',
+        alignItems: 'center',
+        padding: '12px 24px',
+        background: 'linear-gradient(90deg, #FFD8A8 0%, #FFB347 100%)',
+        boxShadow: '0 -2px 8px rgba(0,0,0,0.08)',
+        flexWrap: 'wrap',
         gap: 8,
       }}
     >
@@ -26,10 +27,10 @@ const PageFooter: React.FC<Props> = ({ onShowLogs }) => {
         text="Показать логи"
         onClick={onShowLogs}
         style={{
-          padding: "6px 16px",
+          padding: '6px 16px',
           fontWeight: 600,
           fontSize: 14,
-          background: "#fff"
+          background: '#fff',
         }}
       />
     </Footer>

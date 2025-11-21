@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
-import { Form, Input, Select, FormInstance, Spin } from "antd";
-import { RoleCreateDto } from "../../types/role";
-import { getPermissions } from "../../api/index";
+import { Form, FormInstance, Input, Select, Spin } from 'antd';
+import React, { useEffect, useState } from 'react';
+
+import { getPermissions } from '../../api/index';
+import { RoleCreateDto } from '../../types/role';
 
 interface Props {
   initial?: RoleCreateDto;
@@ -10,7 +11,9 @@ interface Props {
 }
 
 const RoleForm: React.FC<Props> = ({ initial, onFinish, form }) => {
-  const [availablePermissions, setAvailablePermissions] = useState<string[]>([]);
+  const [availablePermissions, setAvailablePermissions] = useState<string[]>(
+    []
+  );
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -21,8 +24,17 @@ const RoleForm: React.FC<Props> = ({ initial, onFinish, form }) => {
   }, []);
 
   return (
-    <Form layout="vertical" form={form} initialValues={initial} onFinish={onFinish}>
-      <Form.Item name="name" label="Название роли" rules={[{ required: true, message: "Введите название роли" }]}>
+    <Form
+      layout="vertical"
+      form={form}
+      initialValues={initial}
+      onFinish={onFinish}
+    >
+      <Form.Item
+        name="name"
+        label="Название роли"
+        rules={[{ required: true, message: 'Введите название роли' }]}
+      >
         <Input />
       </Form.Item>
 
@@ -33,7 +45,7 @@ const RoleForm: React.FC<Props> = ({ initial, onFinish, form }) => {
           <Select
             mode="tags"
             placeholder="Введите разрешения"
-            tokenSeparators={[","]}
+            tokenSeparators={[',']}
             options={availablePermissions.map((p) => ({ label: p, value: p }))}
           />
         )}

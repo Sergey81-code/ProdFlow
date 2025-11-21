@@ -1,8 +1,9 @@
-import React from "react";
-import { Card, Form, Input, Button, message } from "antd";
-import { UserOutlined, LockOutlined } from "@ant-design/icons";
-import { useNavigate } from "react-router-dom";
-import { login } from "../api/index";
+import { LockOutlined,UserOutlined } from '@ant-design/icons';
+import { Button, Card, Form, Input, message } from 'antd';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+
+import { login } from '../api/index';
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -11,35 +12,35 @@ const LoginPage: React.FC = () => {
     try {
       const data = await login(values.username, values.password);
 
-      localStorage.setItem("token", data.access_token);
-      message.success("Успешный вход!");
-      navigate("/");
-    } catch (err: any) {
-      message.error("Неверный логин или пароль");
+      localStorage.setItem('token', data.access_token);
+      message.success('Успешный вход!');
+      navigate('/');
+    } catch {
+      message.error('Неверный логин или пароль');
     }
   };
 
   return (
     <div
       style={{
-        minHeight: "100vh",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
+        minHeight: '100vh',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
       }}
     >
-      <Card title="Авторизация" style={{ width: 320, textAlign: "center" }}>
+      <Card title="Авторизация" style={{ width: 320, textAlign: 'center' }}>
         <Form name="login" onFinish={onFinish}>
           <Form.Item
             name="username"
-            rules={[{ required: true, message: "Введите имя пользователя!" }]}
+            rules={[{ required: true, message: 'Введите имя пользователя!' }]}
           >
             <Input prefix={<UserOutlined />} placeholder="Имя пользователя" />
           </Form.Item>
 
           <Form.Item
             name="password"
-            rules={[{ required: true, message: "Введите пароль!" }]}
+            rules={[{ required: true, message: 'Введите пароль!' }]}
           >
             <Input.Password prefix={<LockOutlined />} placeholder="Пароль" />
           </Form.Item>
@@ -50,9 +51,9 @@ const LoginPage: React.FC = () => {
               htmlType="submit"
               block
               style={{
-                background: "linear-gradient(90deg, #FFD8A8 0%, #FFB347 100%)",
-                border: "none",
-                color: "#333",
+                background: 'linear-gradient(90deg, #FFD8A8 0%, #FFB347 100%)',
+                border: 'none',
+                color: '#333',
                 fontWeight: 500,
               }}
             >

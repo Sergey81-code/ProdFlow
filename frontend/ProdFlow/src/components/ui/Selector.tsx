@@ -1,6 +1,6 @@
-import { Dropdown, Button } from "antd";
-import { DownOutlined } from "@ant-design/icons";
-import React from "react";
+import { DownOutlined } from '@ant-design/icons';
+import { Button,Dropdown } from 'antd';
+import React from 'react';
 
 export interface SelectorItem {
   label: string;
@@ -14,7 +14,11 @@ interface SelectorProps {
   onChange: (value: string) => void;
 }
 
-export const Selector: React.FC<SelectorProps> = ({ items, value, onChange }) => {
+export const Selector: React.FC<SelectorProps> = ({
+  items,
+  value,
+  onChange,
+}) => {
   const menuItems = items.map((i) => ({
     key: i.value,
     icon: i.icon,
@@ -25,9 +29,9 @@ export const Selector: React.FC<SelectorProps> = ({ items, value, onChange }) =>
   const current = items.find((i) => i.value === value);
 
   return (
-    <Dropdown menu={{ items: menuItems }} trigger={["click"]}>
-      <Button style={{ width: "100%" }}>
-        {current?.label || "Выбрать"} <DownOutlined />
+    <Dropdown menu={{ items: menuItems }} trigger={['click']}>
+      <Button style={{ width: '100%' }}>
+        {current?.label || 'Выбрать'} <DownOutlined />
       </Button>
     </Dropdown>
   );

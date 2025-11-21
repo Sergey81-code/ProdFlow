@@ -1,6 +1,7 @@
-import React from "react";
-import { Form, Input, FormInstance } from "antd";
-import { DeviceCreateDto } from "../../types/device";
+import { Form, FormInstance,Input } from 'antd';
+import React from 'react';
+
+import { DeviceCreateDto } from '../../types/device';
 
 interface Props {
   initial?: Partial<DeviceCreateDto>;
@@ -10,11 +11,16 @@ interface Props {
 
 const DeviceForm: React.FC<Props> = ({ initial, onFinish, form }) => {
   return (
-    <Form layout="vertical" form={form} initialValues={initial} onFinish={onFinish}>
+    <Form
+      layout="vertical"
+      form={form}
+      initialValues={initial}
+      onFinish={onFinish}
+    >
       <Form.Item
         name="name"
         label="Название"
-        rules={[{ required: true, message: "Введите название устройства" }]}
+        rules={[{ required: true, message: 'Введите название устройства' }]}
       >
         <Input />
       </Form.Item>
@@ -22,7 +28,7 @@ const DeviceForm: React.FC<Props> = ({ initial, onFinish, form }) => {
       <Form.Item
         name="android_id"
         label="Android ID"
-        rules={[{ required: true, message: "Введите Android ID" }]}
+        rules={[{ required: true, message: 'Введите Android ID' }]}
       >
         <Input />
       </Form.Item>

@@ -1,8 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getUsers, createUser, updateUser, deleteUser } from "../api";
-import { UserCreateDto, UserDto } from "../types/user";
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-const USERS_KEY = ["users"];
+import { createUser, deleteUser,getUsers, updateUser } from '../api';
+import { UserCreateDto, UserDto } from '../types/user';
+
+const USERS_KEY = ['users'];
 
 export const useUsers = () => {
   const qc = useQueryClient();
@@ -19,8 +20,13 @@ export const useUsers = () => {
   });
 
   const update = useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: Partial<UserCreateDto> }) =>
-      updateUser(id, payload),
+    mutationFn: ({
+      id,
+      payload,
+    }: {
+      id: string;
+      payload: Partial<UserCreateDto>;
+    }) => updateUser(id, payload),
     onSuccess: () => qc.invalidateQueries({ queryKey: USERS_KEY }),
   });
 

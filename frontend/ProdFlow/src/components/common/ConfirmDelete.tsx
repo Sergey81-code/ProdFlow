@@ -1,5 +1,5 @@
-import React from "react";
-import { Modal } from "antd";
+import { Modal } from 'antd';
+import React from 'react';
 
 interface Props {
   title?: string;
@@ -8,7 +8,12 @@ interface Props {
   onCancel: () => void;
 }
 
-export const ConfirmDelete: React.FC<Props> = ({ title = "Удалить?", visible, onConfirm, onCancel }) => {
+export const ConfirmDelete: React.FC<Props> = ({
+  title = 'Удалить?',
+  visible,
+  onConfirm,
+  onCancel,
+}) => {
   return (
     <Modal
       title={title}

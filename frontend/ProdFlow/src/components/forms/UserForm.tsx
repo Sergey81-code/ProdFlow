@@ -1,6 +1,7 @@
-import { Form, Input, Select, FormInstance } from "antd";
-import { RoleDto } from "../../types/role";
-import { UserCreateDto } from "../../types/user";
+import { Form, FormInstance,Input, Select } from 'antd';
+
+import { RoleDto } from '../../types/role';
+import { UserCreateDto } from '../../types/user';
 
 interface Props {
   initial?: Partial<UserCreateDto>;
@@ -11,8 +12,17 @@ interface Props {
 
 const UserForm: React.FC<Props> = ({ initial, roles, onFinish, form }) => {
   return (
-    <Form layout="vertical" form={form} initialValues={initial} onFinish={onFinish}>
-      <Form.Item name="username" label="Имя пользователя" rules={[{ required: true }]}>
+    <Form
+      layout="vertical"
+      form={form}
+      initialValues={initial}
+      onFinish={onFinish}
+    >
+      <Form.Item
+        name="username"
+        label="Имя пользователя"
+        rules={[{ required: true }]}
+      >
         <Input />
       </Form.Item>
       <Form.Item name="first_name" label="Имя" rules={[{ required: true }]}>
@@ -24,14 +34,18 @@ const UserForm: React.FC<Props> = ({ initial, roles, onFinish, form }) => {
       <Form.Item name="patronymic" label="Отчество">
         <Input />
       </Form.Item>
-      <Form.Item name="password" label="Пароль" rules={initial ? [] : [{ required: false }]}>
+      <Form.Item
+        name="password"
+        label="Пароль"
+        rules={initial ? [] : [{ required: false }]}
+      >
         <Input />
       </Form.Item>
       <Form.Item name="role_ids" label="Роли">
         <Select
           mode="multiple"
           allowClear
-          options={roles.map(r => ({ label: r.name, value: r.id }))}
+          options={roles.map((r) => ({ label: r.name, value: r.id }))}
         />
       </Form.Item>
     </Form>

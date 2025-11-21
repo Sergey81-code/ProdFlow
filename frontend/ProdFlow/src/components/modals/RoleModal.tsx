@@ -1,8 +1,9 @@
-import React, { useEffect } from "react";
-import { Modal, Button, Form } from "antd";
-import RoleForm from "../forms/RoleForm";
-import { RoleDto, RoleCreateDto } from "../../types/role";
-import ProdFlowButton from "../ui/Button";
+import { Button, Form,Modal } from 'antd';
+import React, { useEffect } from 'react';
+
+import { RoleCreateDto,RoleDto } from '../../types/role';
+import RoleForm from '../forms/RoleForm';
+import ProdFlowButton from '../ui/Button';
 
 interface Props {
   visible: boolean;
@@ -11,7 +12,12 @@ interface Props {
   editingRole?: RoleDto | null;
 }
 
-export const RoleModal: React.FC<Props> = ({ visible, onClose, onSubmit, editingRole }) => {
+export const RoleModal: React.FC<Props> = ({
+  visible,
+  onClose,
+  onSubmit,
+  editingRole,
+}) => {
   const [form] = Form.useForm();
 
   useEffect(() => {
@@ -37,18 +43,18 @@ export const RoleModal: React.FC<Props> = ({ visible, onClose, onSubmit, editing
 
   return (
     <Modal
-      title={editingRole ? "Редактировать роль" : "Добавить роль"}
+      title={editingRole ? 'Редактировать роль' : 'Добавить роль'}
       open={visible}
       onCancel={handleClose}
       footer={null}
       forceRender
     >
       <RoleForm form={form} onFinish={handleFinish} />
-      <div style={{ marginTop: 16, textAlign: "right" }}>
+      <div style={{ marginTop: 16, textAlign: 'right' }}>
         <Button onClick={handleClose} style={{ marginRight: 8 }}>
           Отмена
         </Button>
-        <ProdFlowButton text="Сохранить" onClick={() => form.submit()}/>
+        <ProdFlowButton text="Сохранить" onClick={() => form.submit()} />
       </div>
     </Modal>
   );

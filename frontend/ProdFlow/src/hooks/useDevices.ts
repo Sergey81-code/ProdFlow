@@ -1,8 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getDevices, createDevice, updateDevice, deleteDevice } from "../api";
-import { DeviceCreateDto, DeviceDto } from "../types/device";
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-const DEVICES_KEY = ["devices"];
+import { createDevice, deleteDevice,getDevices, updateDevice } from '../api';
+import { DeviceCreateDto, DeviceDto } from '../types/device';
+
+const DEVICES_KEY = ['devices'];
 
 export const useDevices = () => {
   const qc = useQueryClient();

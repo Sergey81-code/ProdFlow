@@ -41,8 +41,8 @@
   color: #888;
 } */
 
-.ant-dropdown-trigger:hover{
-    background-color: orange !important;
-    color: #000 !important;
-    border: 1px #000 solid !important;
+.ant-dropdown-trigger:hover {
+  background-color: orange !important;
+  color: #000 !important;
+  border: 1px #000 solid !important;
 }
