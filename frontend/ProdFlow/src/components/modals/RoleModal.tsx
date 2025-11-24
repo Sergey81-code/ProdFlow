@@ -8,7 +8,7 @@ import ProdFlowButton from '../ui/Button';
 interface Props {
   visible: boolean;
   onClose: () => void;
-  onSubmit: (vals: RoleCreateDto) => void;
+  onSubmit: (vals: RoleCreateDto)  => Promise<boolean>;
   editingRole?: RoleDto | null;
 }
 
@@ -36,9 +36,11 @@ export const RoleModal: React.FC<Props> = ({
   };
 
   const handleFinish = async (vals: RoleCreateDto) => {
-    await onSubmit(vals);
-    form.resetFields();
-    onClose();
+    const success = await onSubmit(vals);
+    if (success) {
+      form.resetFields();
+      onClose();
+    }
   };
 
   return (

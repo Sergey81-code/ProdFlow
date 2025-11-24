@@ -29,53 +29,57 @@ export const useAdminLogic = () => {
     else setEditingDevice({});
   };
 
-  const handleUserSubmit = async (vals: any) => {
+  const handleSubmit = async (
+    type: 'user' | 'role' | 'device',
+    vals: any
+  ): Promise<boolean> => {
     try {
-      if (editingUser?.id) {
-        await usersQuery.update.mutateAsync({
-          id: editingUser.id,
-          payload: vals,
-        });
-      } else {
-        await usersQuery.create.mutateAsync(vals);
+      if (type === 'user') {
+        if (editingUser?.id) {
+          await usersQuery.update.mutateAsync({
+            id: editingUser.id,
+            payload: vals,
+          });
+        } else {
+          await usersQuery.create.mutateAsync(vals);
+        }
+        setEditingUser(null);
+      } else if (type === 'role') {
+        if (editingRole?.id) {
+          await rolesQuery.update.mutateAsync({
+            id: editingRole.id,
+            payload: vals,
+          });
+        } else {
+          await rolesQuery.create.mutateAsync(vals);
+        }
+        setEditingRole(null);
+      } else if (type === 'device') {
+        if (editingDevice?.id) {
+          await devicesQuery.update.mutateAsync({
+            id: editingDevice.id,
+            payload: vals,
+          });
+        } else {
+          await devicesQuery.create.mutateAsync(vals);
+        }
+        setEditingDevice(null);
       }
-      setEditingUser(null);
+      return true;
     } catch (err) {
       handleApiError(err);
+      return false;
     }
   };
 
-  const handleRoleSubmit = async (vals: any) => {
-    try {
-      if (editingRole?.id) {
-        await rolesQuery.update.mutateAsync({
-          id: editingRole.id,
-          payload: vals,
-        });
-      } else {
-        await rolesQuery.create.mutateAsync(vals);
-      }
-      setEditingRole(null);
-    } catch (err) {
-      handleApiError(err);
-    }
-  };
+  const handleUserSubmit = async (vals: any): Promise<boolean> =>
+    handleSubmit('user', vals);
 
-  const handleDeviceSubmit = async (vals: any) => {
-    try {
-      if (editingDevice?.id) {
-        await devicesQuery.update.mutateAsync({
-          id: editingDevice.id,
-          payload: vals,
-        });
-      } else {
-        await devicesQuery.create.mutateAsync(vals);
-      }
-      setEditingDevice(null);
-    } catch (err) {
-      handleApiError(err);
-    }
-  };
+  const handleRoleSubmit = async (vals: any): Promise<boolean> =>
+    handleSubmit('role', vals);
+
+  const handleDeviceSubmit = async (vals: any): Promise<boolean> =>
+    handleSubmit('device', vals);
 
   const handleDeleteConfirm = async () => {
     if (!deleteTarget) return;
