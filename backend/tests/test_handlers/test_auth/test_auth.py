@@ -6,7 +6,6 @@ from jose import jwt
 
 from config.permissions import Permissions
 from tests.conftest import LOGIN_URL, VERSION_URL
-from utils.hashing import Hasher
 
 
 async def test_login_success(client, create_user_in_database, user_data):
@@ -17,7 +16,7 @@ async def test_login_success(client, create_user_in_database, user_data):
         "last_name": "Doe",
         "patronymic": "Martin",
         "finger_token": "some_token123",
-        "password": Hasher.get_password_hash(user_data["password"]),
+        "password": user_data["password"],
         "role_ids": [],
     }
 
@@ -43,7 +42,7 @@ async def test_login_wrong_password(client, create_user_in_database, user_data):
         "last_name": "Doe",
         "patronymic": "Martin",
         "finger_token": "some_token123",
-        "password": Hasher.get_password_hash(user_data["password"]),
+        "password": user_data["password"],
         "role_ids": [],
     }
 
@@ -66,7 +65,7 @@ async def test_login_user_not_found(client, create_user_in_database, user_data):
         "last_name": "Doe",
         "patronymic": "Martin",
         "finger_token": "some_token123",
-        "password": Hasher.get_password_hash(user_data["password"]),
+        "password": user_data["password"],
         "role_ids": [],
     }
 
@@ -137,7 +136,7 @@ async def test_login_response_shape(
         "last_name": "Doe",
         "patronymic": "Martin",
         "finger_token": "some_token123",
-        "password": Hasher.get_password_hash(user_data["password"]),
+        "password": user_data["password"],
         "role_ids": [str(role_info1["id"]), str(role_info2["id"])],
     }
 

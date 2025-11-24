@@ -57,7 +57,7 @@ class UserService:
             user: User | None = await self._repo.get_by_id(user_id)
             if user is None:
                 raise AppExceptions.not_found_exception("User with this id not found")
-            if self._has_super_role(user):
+            if await self._has_super_role(user):
                 user.password = None
             return user
         except DBException:
