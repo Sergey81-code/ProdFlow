@@ -14,7 +14,6 @@ from api.core.config import get_settings
 from config.permissions import Permissions
 from db.models import Role, User
 from db.session import get_session
-from utils.hashing import Hasher
 
 settings = get_settings()
 
@@ -113,7 +112,7 @@ async def create_superadmin(username, password, name, surname, session):
             username=username,
             first_name=name,
             last_name=surname,
-            password=Hasher.get_password_hash(password),
+            password=password,
             role_ids=[super_role_id_or_none],
         )
 

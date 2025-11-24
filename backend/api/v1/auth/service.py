@@ -23,7 +23,7 @@ class AuthService:
             )
         ):
             raise AppExceptions.unauthorized_exception("Incorrect username or password")
-        if not Hasher.verify_password(password, user[0].password):
+        if password != user[0].password:
             raise AppExceptions.unauthorized_exception("Incorrect username or password")
         return user[0]
 

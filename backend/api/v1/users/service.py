@@ -21,11 +21,44 @@ class UserService:
         self._repo: IUserRepository = user_repository_interface
         self._role_repo: IRoleRepository = role_repository_interface
 
+    async def _has_super_role(
+        self, user: User | CreateUser, roles: list[Role] | None = None
+    ) -> bool:
+        if user.role_ids:
+
+            if not roles:
+                roles: dict[UUID, Role] = {
+                    role.id: role for role in await self._role_repo.get_all()
+                }
+
+            for role_id in user.role_ids:
+                if roles[role_id].name == settings.SUPER_ROLE_NAME:
+                    return True
+
+        return False
+
+    async def _get_not_exist_role_id_from_user_obj(
+        self, user: User | CreateUser, roles: dict[UUID, Role] | None = None
+    ) -> UUID | int:
+        if user.role_ids:
+
+            if not roles:
+                roles: dict[UUID, Role] = {
+                    role.id: role for role in await self._role_repo.get_all()
+                }
+
+            for role_id in user.role_ids:
+                if not roles.get(role_id, None):
+                    return role_id
+        return 0
+
     async def get_user_by_id(self, user_id: UUID) -> User:
         try:
             user: User | None = await self._repo.get_by_id(user_id)
             if user is None:
                 raise AppExceptions.not_found_exception("User with this id not found")
+            if self._has_super_role(user):
+                user.password = None
             return user
         except DBException:
             raise AppExceptions.service_unavailable_exception("Database error.")
@@ -42,29 +75,24 @@ class UserService:
                     f"User with username {user_info.username} already exists"
                 )
 
-            if user_info.role_ids:
-                roles: dict[UUID, Role] = {
-                    role.id: role for role in await self._role_repo.get_all()
-                }
-                for role_id in user_info.role_ids:
-                    if not (role := roles.get(role_id, None)):
-                        raise AppExceptions.bad_request_exception(
-                            f"Role with id {role_id} not found"
-                        )
-                    if role.name == settings.SUPER_ROLE_NAME:
-                        raise AppExceptions.forbidden_exception(
-                            "Creating a superuser is forbidden"
-                        )
-            user_info.password = Hasher.get_password_hash(user_info.password)
+            roles: dict[UUID, Role] = {
+                role.id: role for role in await self._role_repo.get_all()
+            }
+            role_id = await self._get_not_exist_role_id_from_user_obj(user_info, roles)
+            if role_id:
+                raise AppExceptions.bad_request_exception(
+                    f"Role with id {role_id} not found"
+                )
+            if await self._has_super_role(user_info, roles):
+                raise AppExceptions.forbidden_exception(
+                    "Creating a superuser is forbidden"
+                )
             return await self._repo.create(user_info)
         except DBException:
             raise AppExceptions.service_unavailable_exception("Database error.")
 
     async def update_user(self, user: User, body: CreateUser) -> User:
         try:
-            body.password = (
-                Hasher.get_password_hash(body.password) if body.password else None
-            )
             if not (user_info := body.model_dump(exclude_none=True)):
                 raise AppExceptions.validation_exception(
                     "At least one parameter must be defined"
@@ -80,9 +108,7 @@ class UserService:
                 raise AppExceptions.bad_request_exception(
                     f"User with username {user_info['username']} already exists"
                 )
-            roles: list[Role] = await self._role_repo.get_all()
-            user_role_names = [role.name for role in roles if role.id in user.role_ids]
-            if settings.SUPER_ROLE_NAME in user_role_names:
+            if await self._has_super_role(user):
                 raise AppExceptions.forbidden_exception(
                     "User with super role is not allowed to perform this action"
                 )
@@ -95,9 +121,7 @@ class UserService:
             user: User | None = await self._repo.get_by_id(user_id)
             if user is None:
                 raise AppExceptions.not_found_exception("User with this id not found")
-            roles: list[Role] = await self._role_repo.get_all()
-            user_role_names = [role.name for role in roles if role.id in user.role_ids]
-            if settings.SUPER_ROLE_NAME in user_role_names:
+            if await self._has_super_role(user):
                 raise AppExceptions.forbidden_exception(
                     "User with super role is not allowed to perform this action"
                 )
@@ -107,10 +131,22 @@ class UserService:
 
     async def get_user_by_name_or_all(self, user_name: str) -> list[User]:
         try:
+            roles: dict[UUID, Role] = {
+                role.id: role for role in await self._role_repo.get_all()
+            }
             if user_name:
                 users = await self._repo.get_by_username(user_name)
                 users += await self._repo.get_by_person_name_fields(user_name)
-                return {user.id: user for user in users}.values()
-            return await self._repo.get_all()
+                unique_users = dict()
+                for user in users:
+                    if await self._has_super_role(user, roles):
+                        user.password = None
+                    unique_users[user.id] = user
+                return unique_users.values()
+            users = await self._repo.get_all()
+            for user in users:
+                if await self._has_super_role(user, roles):
+                    user.password = None
+            return users
         except DBException:
             raise AppExceptions.service_unavailable_exception("Database error.")
