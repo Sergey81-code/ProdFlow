@@ -9,20 +9,24 @@ from config.permissions import Permissions
 settings = get_settings()
 
 
-async def create_jwt_token(permissions: list[str]) -> str:
+async def create_jwt_token(permissions: list[str], username: str | None = None) -> str:
     token_key = settings.SECRET_KEY_FOR_ACCESS
     token_time = 30
     to_encode = {"permissions": permissions}
     expire = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(
         minutes=token_time
     )
-    to_encode.update({"sub": "test@mail.ru"})
+    if not username:
+        username = "test@mail.ru"
+    to_encode.update({"sub": username})
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, token_key, algorithm=settings.ALGORITHM)
 
 
-async def create_auth_headers_for_user(permissions: list[str]) -> dict[str]:
-    token = await create_jwt_token(permissions)
+async def create_auth_headers_for_user(
+    permissions: list[str], username: str | None = None
+) -> dict[str]:
+    token = await create_jwt_token(permissions, username)
     return {"Authorization": f"Bearer {token}"}
 
 

@@ -129,14 +129,14 @@ class UserService:
         except DBException:
             raise AppExceptions.service_unavailable_exception("Database error.")
 
-    async def get_user_by_name_or_all(self, user_name: str) -> list[User]:
+    async def get_user_by_name_or_all(self, username: str) -> list[User]:
         try:
             roles: dict[UUID, Role] = {
                 role.id: role for role in await self._role_repo.get_all()
             }
-            if user_name:
-                users = await self._repo.get_by_username(user_name)
-                users += await self._repo.get_by_person_name_fields(user_name)
+            if username:
+                users = await self._repo.get_by_username(username)
+                users += await self._repo.get_by_person_name_fields(username)
                 unique_users = dict()
                 for user in users:
                     if await self._has_super_role(user, roles):
@@ -148,5 +148,16 @@ class UserService:
                 if await self._has_super_role(user, roles):
                     user.password = None
             return users
+        except DBException:
+            raise AppExceptions.service_unavailable_exception("Database error.")
+
+    async def get_user_by_username(self, username: str) -> User:
+        try:
+            user = await self._repo.get_by_username(
+                username, exact_match=True, case_sensitive=True
+            )
+            if not user:
+                raise AppExceptions.not_found_exception("User not found")
+            return user[0]
         except DBException:
             raise AppExceptions.service_unavailable_exception("Database error.")

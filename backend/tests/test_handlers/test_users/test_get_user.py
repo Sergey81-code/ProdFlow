@@ -9,6 +9,7 @@ from tests.utils_for_tests import (
     _create_users,
     create_auth_headers_for_user,
 )
+from utils.jwt import JWT
 
 
 async def test_get_user(client, create_user_in_database, create_role_in_database):
@@ -369,3 +370,125 @@ async def test_fulltext_search_parametrized(
         f"Got: {len(returned_ids)} -> {returned_ids}\n"
         f"Returned data: {data}"
     )
+
+
+async def test_get_me_success(client, create_user_in_database):
+    user_info = {
+        "id": uuid4(),
+        "username": "johndoe",
+        "first_name": "John",
+        "last_name": "Doe",
+        "patronymic": "Martin",
+        "finger_token": "finger123",
+        "role_ids": [],
+    }
+
+    await create_user_in_database(user_info)
+
+    headers = await create_auth_headers_for_user(
+        permissions=[],
+        username=user_info["username"],
+    )
+
+    resp = client.get(f"{VERSION_URL}{USER_URL}/me", headers=headers)
+
+    assert resp.status_code == 200
+    data = resp.json()
+
+    assert data["id"] == str(user_info["id"])
+    assert data["username"] == user_info["username"]
+    assert data["first_name"] == user_info["first_name"]
+    assert data["last_name"] == user_info["last_name"]
+    assert data["patronymic"] == user_info["patronymic"]
+    assert data["finger_token"] == user_info["finger_token"]
+    assert data["role_ids"] == user_info["role_ids"]
+
+
+async def test_get_me_unauthorized_no_token(client):
+    resp = client.get(f"{VERSION_URL}{USER_URL}/me")
+
+    assert resp.status_code == 403
+    assert resp.json() == {"detail": "Not authenticated"}
+
+
+async def test_get_me_bad_token(client):
+    headers = await create_auth_headers_for_user(permissions=[])
+    bad = {k: v + "broken" for k, v in headers.items()}
+
+    resp = client.get(f"{VERSION_URL}{USER_URL}/me", headers=bad)
+
+    assert resp.status_code == 401
+    assert resp.json() == {"detail": "Could not validate credentials"}
+
+
+async def test_get_me_no_username_in_token(client):
+    headers = await create_auth_headers_for_user(
+        permissions=[],
+        username="johndoe",
+    )
+
+    token = headers["Authorization"].split(" ")[1]
+
+    payload = await JWT.decode_jwt_token(token, "access")
+
+    payload.pop("sub", None)
+
+    new_token = await JWT.create_jwt_token(payload, "access")
+
+    headers["Authorization"] = f"Bearer {new_token}"
+
+    resp = client.get(f"{VERSION_URL}{USER_URL}/me", headers=headers)
+
+    assert resp.status_code == 401
+    assert resp.json() == {"detail": "Could not validate credentials"}
+
+
+async def test_get_me_user_not_found(client):
+    headers = await create_auth_headers_for_user(permissions=[], username="ghost_user")
+
+    resp = client.get(f"{VERSION_URL}{USER_URL}/me", headers=headers)
+
+    assert resp.status_code == 404
+    assert resp.json() == {"detail": "User not found"}
+
+
+async def test_get_me_without_permissions(client, create_user_in_database):
+    user_info = {
+        "id": uuid4(),
+        "username": "user_without_permissions",
+        "first_name": "No",
+        "last_name": "Rights",
+        "patronymic": "Test",
+        "finger_token": "no_perm",
+        "role_ids": [],
+    }
+
+    await create_user_in_database(user_info)
+
+    headers = await create_auth_headers_for_user(
+        permissions=[], username=user_info["username"]
+    )
+
+    resp = client.get(f"{VERSION_URL}{USER_URL}/me", headers=headers)
+
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["username"] == user_info["username"]
+
+
+async def test_get_me_case_sensitive_username(client, create_user_in_database):
+    user_info = {
+        "id": uuid4(),
+        "username": "JohnDoe",
+        "first_name": "John",
+        "last_name": "Doe",
+    }
+
+    await create_user_in_database(user_info)
+
+    headers = await create_auth_headers_for_user(permissions=[], username="johndoe")
+
+    resp = client.get(f"{VERSION_URL}{USER_URL}/me", headers=headers)
+
+    assert resp.status_code == 404
+    assert resp.json() == {"detail": "User not found"}
