@@ -21,17 +21,13 @@ async def list_logs():
     return {"logs": files}
 
 
-@log_router.get(
-    "/{log_filename}", dependencies=[permission_required([Permissions.GET_LOGS])]
-)
+@log_router.get("/{log_filename}", dependencies=[permission_required([Permissions.GET_LOGS])])
 async def get_log_file(log_filename: str):
     file_path = os.path.join(LOG_DIR, log_filename)
 
     if not os.path.exists(file_path) or not os.path.isfile(file_path):
         raise HTTPException(status_code=404, detail="Log file not found")
-    if os.path.commonpath([os.path.realpath(file_path), LOG_DIR]) != os.path.realpath(
-        LOG_DIR
-    ):
+    if os.path.commonpath([os.path.realpath(file_path), LOG_DIR]) != os.path.realpath(LOG_DIR):
         raise HTTPException(status_code=403, detail="Access denied")
 
     return FileResponse(file_path, media_type="text/plain", filename=log_filename)

@@ -93,9 +93,7 @@ async def test_login_missing_fields(client, data):
 
 
 async def test_login_wrong_content_type_json(client):
-    response = client.post(
-        url=f"{VERSION_URL}{LOGIN_URL}", json={"username": "john", "password": "123"}
-    )
+    response = client.post(url=f"{VERSION_URL}{LOGIN_URL}", json={"username": "john", "password": "123"})
     assert response.status_code == 422
 
 

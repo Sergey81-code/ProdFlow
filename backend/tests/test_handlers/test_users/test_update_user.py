@@ -7,13 +7,9 @@ from tests.conftest import USER_URL, VERSION_URL
 from tests.utils_for_tests import create_auth_headers_for_user
 
 
-async def test_update_user(
-    client, create_user_in_database, create_role_in_database, get_user_from_database
-):
+async def test_update_user(client, create_user_in_database, create_role_in_database, get_user_from_database):
     role_id = uuid4()
-    await create_role_in_database(
-        {"id": role_id, "name": "employee", "permissions": []}
-    )
+    await create_role_in_database({"id": role_id, "name": "employee", "permissions": []})
 
     user_id = await create_user_in_database(
         {
@@ -63,15 +59,11 @@ async def test_update_user(
     assert [str(role) for role in user_db["role_ids"]] == body["role_ids"]
 
 
-async def test_update_user_role_change_success(
-    client, create_user_in_database, create_role_in_database, get_user_from_database
-):
+async def test_update_user_role_change_success(client, create_user_in_database, create_role_in_database, get_user_from_database):
     rid_old = uuid4()
     rid_new = uuid4()
 
-    await create_role_in_database(
-        {"id": rid_old, "name": "employee", "permissions": []}
-    )
+    await create_role_in_database({"id": rid_old, "name": "employee", "permissions": []})
     await create_role_in_database({"id": rid_new, "name": "manager", "permissions": []})
 
     user_id = await create_user_in_database(
@@ -90,18 +82,14 @@ async def test_update_user_role_change_success(
     body = {"role_ids": [str(rid_new)]}
     headers = await create_auth_headers_for_user([Permissions.UPDATE_USER])
 
-    resp = client.patch(
-        f"{VERSION_URL}{USER_URL}/{user_id}", json=body, headers=headers
-    )
+    resp = client.patch(f"{VERSION_URL}{USER_URL}/{user_id}", json=body, headers=headers)
     assert resp.status_code == 200
 
     user_db = await get_user_from_database(user_id)
     assert set(user_db["role_ids"]) == {rid_new}
 
 
-async def test_update_user_forbidden_for_super(
-    client, create_user_in_database, create_role_in_database, get_project_settings
-):
+async def test_update_user_forbidden_for_super(client, create_user_in_database, create_role_in_database, get_project_settings):
     settings = await get_project_settings()
 
     super_role_id = uuid4()
@@ -135,14 +123,10 @@ async def test_update_user_forbidden_for_super(
     )
 
     assert resp.status_code == 403
-    assert resp.json() == {
-        "detail": "User with super role is not allowed to perform this action"
-    }
+    assert resp.json() == {"detail": "User with super role is not allowed to perform this action"}
 
 
-async def test_update_user_unauthenticated(
-    client, create_user_in_database, get_project_settings
-):
+async def test_update_user_unauthenticated(client, create_user_in_database, get_project_settings):
     user_id = await create_user_in_database(
         {
             "id": uuid4(),
@@ -168,9 +152,7 @@ async def test_update_user_unauthenticated(
         assert resp.status_code == 200
 
 
-async def test_update_user_no_permissions(
-    client, create_user_in_database, get_project_settings
-):
+async def test_update_user_no_permissions(client, create_user_in_database, get_project_settings):
     user_id = await create_user_in_database(
         {
             "id": uuid4(),

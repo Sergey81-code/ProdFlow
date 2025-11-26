@@ -3,7 +3,6 @@ from typing import cast
 from api.core.exceptions import AppExceptions
 from api.v1.users.repo_interface import IUserRepository
 from api.v1.users.schemas import User
-from utils.hashing import Hasher
 from utils.jwt import JWT
 
 

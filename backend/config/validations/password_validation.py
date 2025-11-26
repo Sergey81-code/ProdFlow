@@ -25,11 +25,7 @@ class PasswordValidation:
     }
 
     def __init__(self, password_mask: str):
-        self._password_mask_name = (
-            password_mask
-            if password_mask in self.__PASSWORD_MESSAGES.keys()
-            else self.__PASSWORD_MESSAGES.keys()[0]
-        )
+        self._password_mask_name = password_mask if password_mask in self.__PASSWORD_MESSAGES.keys() else self.__PASSWORD_MESSAGES.keys()[0]
         self._passwork_mask = self.__PASSWORD_PATTERNS.get(password_mask, None)
         if self._passwork_mask is None:
             self._pattern_key = next(iter(self.__PASSWORD_PATTERNS))

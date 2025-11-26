@@ -78,9 +78,7 @@ async def test_get_role_unauth(client, create_role_in_database, get_project_sett
         assert resp.status_code == 200
 
 
-async def test_get_role_no_permissions(
-    client, create_role_in_database, get_project_settings
-):
+async def test_get_role_no_permissions(client, create_role_in_database, get_project_settings):
     role_id = uuid4()
     role_info = {
         "id": role_id,
@@ -117,9 +115,7 @@ async def test_get_role_no_permissions(
                         "loc": ["path", "role_id"],
                         "msg": "Input should be a valid UUID, invalid length: expected length 32 for simple format, found 3",
                         "input": "123",
-                        "ctx": {
-                            "error": "invalid length: expected length 32 for simple format, found 3"
-                        },
+                        "ctx": {"error": "invalid length: expected length 32 for simple format, found 3"},
                     }
                 ]
             },
@@ -134,18 +130,14 @@ async def test_get_role_no_permissions(
                         "loc": ["path", "role_id"],
                         "msg": "Input should be a valid UUID, invalid character: expected an optional prefix of `urn:uuid:` followed by [0-9a-fA-F-], found `n` at 1",
                         "input": "not-a-uuid",
-                        "ctx": {
-                            "error": "invalid character: expected an optional prefix of `urn:uuid:` followed by [0-9a-fA-F-], found `n` at 1"
-                        },
+                        "ctx": {"error": "invalid character: expected an optional prefix of `urn:uuid:` followed by [0-9a-fA-F-], found `n` at 1"},
                     }
                 ]
             },
         ),
     ],
 )
-async def test_get_role_invalid_id(
-    client, create_role_in_database, bad_id, expected_status_code, expected_detail
-):
+async def test_get_role_invalid_id(client, create_role_in_database, bad_id, expected_status_code, expected_detail):
     role_id = uuid4()
     role_info = {
         "id": role_id,
@@ -230,9 +222,7 @@ async def test_get_roles_empty_query_returns_all(client, create_role_in_database
     assert len(data) == len(roles)
 
 
-async def test_get_roles_unauthorized_no_token(
-    client, create_role_in_database, get_project_settings
-):
+async def test_get_roles_unauthorized_no_token(client, create_role_in_database, get_project_settings):
     await _create_roles(create_role_in_database)
 
     resp = client.get(f"{VERSION_URL}{ROLE_URL}/")
@@ -245,9 +235,7 @@ async def test_get_roles_unauthorized_no_token(
         assert resp.status_code == 200
 
 
-async def test_get_roles_forbidden(
-    client, create_role_in_database, get_project_settings
-):
+async def test_get_roles_forbidden(client, create_role_in_database, get_project_settings):
     await _create_roles(create_role_in_database)
     headers = await create_auth_headers_for_user([Permissions.GET_DEVICES])
 
@@ -261,9 +249,7 @@ async def test_get_roles_forbidden(
         assert resp.status_code == 200
 
 
-async def test_get_roles_wrong_token(
-    client, create_role_in_database, get_project_settings
-):
+async def test_get_roles_wrong_token(client, create_role_in_database, get_project_settings):
     await _create_roles(create_role_in_database)
 
     resp = client.get(

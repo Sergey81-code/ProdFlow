@@ -22,9 +22,7 @@ class IRoleRepository(ABC):
         pass
 
     @abstractmethod
-    async def get_by_name(
-        self, name: str, exact_match: bool = False, case_sensitive: bool = False
-    ) -> list[Role]:
+    async def get_by_name(self, name: str, exact_match: bool = False, case_sensitive: bool = False) -> list[Role]:
         pass
 
     @abstractmethod

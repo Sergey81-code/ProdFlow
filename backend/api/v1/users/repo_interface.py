@@ -22,15 +22,11 @@ class IUserRepository(ABC):
         pass
 
     @abstractmethod
-    async def get_by_username(
-        self, name: str, exact_match: bool = False, case_sensitive: bool = False
-    ) -> list[User]:
+    async def get_by_username(self, name: str, exact_match: bool = False, case_sensitive: bool = False) -> list[User]:
         pass
 
     @abstractmethod
-    async def get_by_person_name_fields(
-        self, name: str, exact_match: bool = False, case_sensitive: bool = False
-    ) -> list[User]:
+    async def get_by_person_name_fields(self, name: str, exact_match: bool = False, case_sensitive: bool = False) -> list[User]:
         pass
 
     @abstractmethod

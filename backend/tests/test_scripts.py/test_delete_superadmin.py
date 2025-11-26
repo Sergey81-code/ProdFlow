@@ -40,16 +40,12 @@ async def test_delete_superadmin(
     await create_user_in_database(user_data)
 
     engine = create_async_engine(settings.TEST_DATABASE_URL, future=True, echo=True)
-    AsyncSessionMaker = sessionmaker(
-        engine, class_=AsyncSession, expire_on_commit=False
-    )
+    AsyncSessionMaker = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
     async with AsyncSessionMaker() as isolated_session:
         await delete_superadmin(user_data["username"], isolated_session)
 
-        result = await isolated_session.execute(
-            select(User).where(User.username == user_data["username"])
-        )
+        result = await isolated_session.execute(select(User).where(User.username == user_data["username"]))
 
         users = result.scalars().all()
 
@@ -88,16 +84,12 @@ async def test_delete_superadmin_email_not_found(
     username_not_exists = "nonexistent@example.com"
 
     engine = create_async_engine(settings.TEST_DATABASE_URL, future=True, echo=True)
-    AsyncSessionMaker = sessionmaker(
-        engine, class_=AsyncSession, expire_on_commit=False
-    )
+    AsyncSessionMaker = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
     async with AsyncSessionMaker() as isolated_session:
         with patch("builtins.print") as mock_print:
             await delete_superadmin(username_not_exists, isolated_session)
-            mock_print.assert_any_call(
-                "Error: A user with this username does not exist."
-            )
+            mock_print.assert_any_call("Error: A user with this username does not exist.")
 
     user_from_db = await get_user_from_database(user_data["id"])
 
@@ -107,6 +99,4 @@ async def test_delete_superadmin_email_not_found(
     assert user_from_db["patronymic"] == user_data["patronymic"]
     assert user_from_db["finger_token"] == user_data["finger_token"]
     assert user_from_db["password"] == user_data["password"]
-    assert [str(role_id) for role_id in user_from_db["role_ids"]] == user_data[
-        "role_ids"
-    ]
+    assert [str(role_id) for role_id in user_from_db["role_ids"]] == user_data["role_ids"]

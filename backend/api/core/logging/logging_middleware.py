@@ -28,14 +28,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
     def mask_secrets(self, obj):
         """Recursively replaces all secret fields with '********'"""
         if isinstance(obj, dict):
-            return {
-                k: (
-                    "********"
-                    if any(secret in k.lower() for secret in self.SECRET_FIELDS)
-                    else self.mask_secrets(v)
-                )
-                for k, v in obj.items()
-            }
+            return {k: ("********" if any(secret in k.lower() for secret in self.SECRET_FIELDS) else self.mask_secrets(v)) for k, v in obj.items()}
         elif isinstance(obj, list):
             return [self.mask_secrets(i) for i in obj]
         return obj

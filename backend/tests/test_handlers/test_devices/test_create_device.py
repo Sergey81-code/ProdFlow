@@ -37,12 +37,8 @@ async def test_create_device(client, get_device_from_database):
         ("another name", "Another Name"),
     ],
 )
-async def test_create_device_duplicate_name_case_insensitive(
-    client, create_device_in_database, existing_name, new_name
-):
-    await create_device_in_database(
-        {"id": uuid4(), "name": existing_name, "android_id": "a3f9c2b7d18e44fa"}
-    )
+async def test_create_device_duplicate_name_case_insensitive(client, create_device_in_database, existing_name, new_name):
+    await create_device_in_database({"id": uuid4(), "name": existing_name, "android_id": "a3f9c2b7d18e44fa"})
 
     resp = client.post(
         f"{VERSION_URL}{DEVICE_URL}/",
@@ -62,12 +58,8 @@ async def test_create_device_duplicate_name_case_insensitive(
         ("A3f9C2b7D18E44Fa", "a3f9c2b7d18e44fa", "New Device 3"),
     ],
 )
-async def test_create_device_duplicate_android_id_case_insensitive(
-    client, create_device_in_database, existing, new, device_name
-):
-    await create_device_in_database(
-        {"id": uuid4(), "name": "Existing", "android_id": existing}
-    )
+async def test_create_device_duplicate_android_id_case_insensitive(client, create_device_in_database, existing, new, device_name):
+    await create_device_in_database({"id": uuid4(), "name": "Existing", "android_id": existing})
 
     resp = client.post(
         f"{VERSION_URL}{DEVICE_URL}/",

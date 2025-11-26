@@ -11,12 +11,8 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "ProdFlow"
     VERSION: str = "1.0.0"
 
-    ASYNC_REAL_DATABASE_URL: str = (
-        "postgresql+asyncpg://postgres:postgres@localhost:5435/prodflow"
-    )
-    TEST_DATABASE_URL: str = (
-        "postgresql+asyncpg://postgres_test:postgres_test@localhost:5429/postgres_test"
-    )
+    ASYNC_REAL_DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5435/prodflow"
+    TEST_DATABASE_URL: str = "postgresql+asyncpg://postgres_test:postgres_test@localhost:5429/postgres_test"
     SECRET_KEY_FOR_ACCESS: str = "your-strong-access-secret-key"
     ALGORITHM: str = "HS256"
     APP_PORT: int = 8000

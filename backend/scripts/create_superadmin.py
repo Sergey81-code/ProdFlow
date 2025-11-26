@@ -68,9 +68,7 @@ async def prompt_for_superadmin_credentials():
             sys.exit(0)
         if is_valid_password(password):
             break
-        print(
-            "Password must be at least 8 characters long and contain uppercase and lowercase letters, numbers, and special characters. Type 'exit' or 'exit()' to exit the program."
-        )
+        print("Password must be at least 8 characters long and contain uppercase and lowercase letters, numbers, and special characters. Type 'exit' or 'exit()' to exit the program.")
 
     while True:
         password2 = get_password("Repeat password: ")
@@ -90,9 +88,7 @@ async def prompt_for_superadmin_credentials():
 
 async def create_superadmin(username, password, name, surname, session):
     """Create a superadmin in the database"""
-    super_role_id_or_none = await check_creation_super_role(
-        settings.SUPER_ROLE_NAME, session
-    )
+    super_role_id_or_none = await check_creation_super_role(settings.SUPER_ROLE_NAME, session)
 
     async with session.begin():
         if super_role_id_or_none is None:
