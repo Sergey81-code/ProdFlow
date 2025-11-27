@@ -21,10 +21,19 @@ class DeviceService:
 
     async def create_device_in_database(self, device_info: CreateDevice) -> Device:
         try:
-            if await self._repo.get_by_name(device_info.name, exact_match=True, case_sensitive=False) != []:
-                raise AppExceptions.bad_request_exception(f"Device with name {device_info.name} already exists")
+            if (
+                await self._repo.get_by_name(
+                    device_info.name, exact_match=True, case_sensitive=False
+                )
+                != []
+            ):
+                raise AppExceptions.bad_request_exception(
+                    f"Device with name {device_info.name} already exists"
+                )
             if await self._repo.get_by_android_id(device_info.android_id) is not None:
-                raise AppExceptions.bad_request_exception(f"Device with android_id {device_info.android_id} already exists")
+                raise AppExceptions.bad_request_exception(
+                    f"Device with android_id {device_info.android_id} already exists"
+                )
             return await self._repo.create(device_info)
         except DBException:
             raise AppExceptions.service_unavailable_exception("Database error.")
@@ -32,11 +41,30 @@ class DeviceService:
     async def update_device(self, device: Device, body: CreateDevice) -> Device:
         try:
             if not body.model_dump(exclude_none=True):
-                raise AppExceptions.validation_exception("At least one parameter must be defined")
-            if body.name and body.name != device.name and (await self._repo.get_by_name(body.name, exact_match=True, case_sensitive=False) != []):
-                raise AppExceptions.bad_request_exception(f"Device with name {body.name} already exists.")
-            if body.android_id and body.android_id != device.android_id and await self._repo.get_by_android_id(body.android_id) is not None:
-                raise AppExceptions.bad_request_exception("Device with this android_id already exists")
+                raise AppExceptions.validation_exception(
+                    "At least one parameter must be defined"
+                )
+            if (
+                body.name
+                and body.name != device.name
+                and (
+                    await self._repo.get_by_name(
+                        body.name, exact_match=True, case_sensitive=False
+                    )
+                    != []
+                )
+            ):
+                raise AppExceptions.bad_request_exception(
+                    f"Device with name {body.name} already exists."
+                )
+            if (
+                body.android_id
+                and body.android_id != device.android_id
+                and await self._repo.get_by_android_id(body.android_id) is not None
+            ):
+                raise AppExceptions.bad_request_exception(
+                    "Device with this android_id already exists"
+                )
             return await self._repo.update(device, body)
         except DBException:
             raise AppExceptions.service_unavailable_exception("Database error.")
@@ -57,8 +85,13 @@ class DeviceService:
         except DBException:
             raise AppExceptions.service_unavailable_exception("Database error.")
 
-    async def get_device_by_android_id(self, android_id: UUID) -> Device:
+    async def get_device_by_android_id(self, android_id: str) -> Device:
         try:
-            return await self._repo.get_by_android_id(android_id)
+            device = await self._repo.get_by_android_id(android_id)
+            if not device:
+                raise AppExceptions.not_found_exception(
+                    f"Device with this android id {android_id} not found"
+                )
+            return device
         except DBException:
             raise AppExceptions.service_unavailable_exception("Database error.")
