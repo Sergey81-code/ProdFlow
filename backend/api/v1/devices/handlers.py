@@ -12,6 +12,28 @@ router = APIRouter()
 
 
 @router.get(
+    "/android/{device_android_id}",
+)
+async def get_devices_by_android_id(
+    device_android_id: str,
+    device_service: DeviceService = Depends(get_device_service),
+) -> ShowDevice:
+    return await device_service.get_device_by_android_id(device_android_id)
+
+
+@router.get(
+    "/",
+    response_model=list[ShowDevice],
+    dependencies=[permission_required([Permissions.GET_DEVICES])],
+)
+async def get_devices_by_name_or_all(
+    device_name: str | None = None,
+    device_service: DeviceService = Depends(get_device_service),
+) -> list[ShowDevice]:
+    return await device_service.get_device_by_name_or_all(device_name)
+
+
+@router.get(
     "/{device_id}",
     response_model=ShowDevice,
     dependencies=[permission_required([Permissions.GET_DEVICES])],
@@ -58,27 +80,3 @@ async def delete_device(
     device_service: DeviceService = Depends(get_device_service),
 ) -> UUID:
     return await device_service.delete_device_by_id(device_id)
-
-
-@router.get(
-    "/",
-    response_model=list[ShowDevice],
-    dependencies=[permission_required([Permissions.GET_DEVICES])],
-)
-async def get_devices_by_name_or_all(
-    device_name: str | None = None,
-    device_service: DeviceService = Depends(get_device_service),
-) -> list[ShowDevice]:
-    return await device_service.get_device_by_name_or_all(device_name)
-
-
-@router.get(
-    "/",
-    response_model=list[ShowDevice],
-    dependencies=[permission_required([Permissions.GET_DEVICES])],
-)
-async def get_devices_by_android_id(
-    device_android_id: UUID | None = None,
-    device_service: DeviceService = Depends(get_device_service),
-) -> ShowDevice:
-    return await device_service.get_device_by_android_id(device_android_id)

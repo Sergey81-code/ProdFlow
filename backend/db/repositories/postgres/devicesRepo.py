@@ -26,12 +26,7 @@ class PostgresDeviceRepo(IDeviceRepository):
         return Device.model_validate(device)
 
     async def update(self, device: Device, info: UpdateDevice) -> Device:
-        stmt = (
-            update(DeviceModel)
-            .where(DeviceModel.id == device.id)
-            .values(**info.model_dump(exclude_none=True))
-            .returning(DeviceModel)
-        )
+        stmt = update(DeviceModel).where(DeviceModel.id == device.id).values(**info.model_dump(exclude_none=True)).returning(DeviceModel)
         result = await self._session.execute(stmt)
         await self._session.commit()
         updated_device = result.scalar_one()
@@ -52,18 +47,10 @@ class PostgresDeviceRepo(IDeviceRepository):
     ) -> list[Device]:
         if exact_match:
             pattern = name
-            filter_expr = (
-                DeviceModel.name == pattern
-                if case_sensitive
-                else func.lower(DeviceModel.name) == pattern.lower()
-            )
+            filter_expr = DeviceModel.name == pattern if case_sensitive else func.lower(DeviceModel.name) == pattern.lower()
         else:
             pattern = f"%{name}%"
-            filter_expr = (
-                DeviceModel.name.like(pattern)
-                if case_sensitive
-                else DeviceModel.name.ilike(pattern)
-            )
+            filter_expr = DeviceModel.name.like(pattern) if case_sensitive else DeviceModel.name.ilike(pattern)
 
         stmt = select(DeviceModel).where(filter_expr)
         result = await self._session.execute(stmt)
@@ -76,9 +63,7 @@ class PostgresDeviceRepo(IDeviceRepository):
         return [Device.model_validate(d) for d in devices]
 
     async def get_by_android_id(self, android_id: str) -> Device | None:
-        stmt = select(DeviceModel).where(
-            func.lower(DeviceModel.android_id) == android_id.lower()
-        )
+        stmt = select(DeviceModel).where(func.lower(DeviceModel.android_id) == android_id.lower())
         result = await self._session.execute(stmt)
         device = result.scalar_one_or_none()
         return Device.model_validate(device) if device else None

@@ -30,6 +30,7 @@ class ShowUser(TundeModel):
     patronymic: str | None = None
     finger_token: str | None = None
     role_ids: list[UUID] | None = []
+    password: str | None = None
 
 
 class CreateUser(BaseModel):

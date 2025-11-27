@@ -45,9 +45,7 @@ async def test_create_role(client, get_role_from_database):
         ("Test Duplicate", "TeSt DuPlIcAtE"),
     ],
 )
-async def test_create_role_duplicate_name_case_insensitive(
-    client, create_role_in_database, existing_name, new_name
-):
+async def test_create_role_duplicate_name_case_insensitive(client, create_role_in_database, existing_name, new_name):
     await create_role_in_database(
         {
             "id": uuid4(),
@@ -138,9 +136,7 @@ async def test_create_role_no_privilege(client, get_project_settings):
         ),
     ],
 )
-async def test_create_role_validation(
-    client, role_info, expected_status, expected_detail_contains
-):
+async def test_create_role_validation(client, role_info, expected_status, expected_detail_contains):
     resp = client.post(
         f"{VERSION_URL}{ROLE_URL}/",
         json=role_info,
@@ -173,9 +169,7 @@ async def test_create_role_super_admin_not_allowed(client, get_project_settings)
     assert resp.json() == {"detail": "Role with this name is not allowed to create"}
 
 
-async def test_create_role_super_admin_not_allowed_uppercase(
-    client, get_project_settings
-):
+async def test_create_role_super_admin_not_allowed_uppercase(client, get_project_settings):
     settings = await get_project_settings()
     role_info = {
         "name": settings.SUPER_ROLE_NAME.upper(),

@@ -8,13 +8,9 @@ from tests.conftest import USER_URL, VERSION_URL
 from tests.utils_for_tests import create_auth_headers_for_user
 
 
-async def test_create_user_success(
-    client, get_user_from_database, create_role_in_database
-):
+async def test_create_user_success(client, get_user_from_database, create_role_in_database):
     role_id = uuid4()
-    await create_role_in_database(
-        {"id": role_id, "name": "employee", "permissions": []}
-    )
+    await create_role_in_database({"id": role_id, "name": "employee", "permissions": []})
 
     user_data = {
         "username": "johndoe",
@@ -58,9 +54,7 @@ async def test_create_user_success(
         ("MiXeDCase", "mixedcase"),
     ],
 )
-async def test_create_user_duplicate_username_case_insensitive(
-    client, create_user_in_database, existing, new
-):
+async def test_create_user_duplicate_username_case_insensitive(client, create_user_in_database, existing, new):
     await create_user_in_database(
         {
             "id": uuid4(),
@@ -232,14 +226,10 @@ async def test_create_user_validation(client, body, expected_missing):
         assert f in error, f"Field '{f}' is missing in error: {error}"
 
 
-async def test_create_user_super_admin_not_allowed(
-    client, create_role_in_database, get_project_settings
-):
+async def test_create_user_super_admin_not_allowed(client, create_role_in_database, get_project_settings):
     role_id = uuid4()
     settings = await get_project_settings()
-    await create_role_in_database(
-        {"id": role_id, "name": settings.SUPER_ROLE_NAME, "permissions": []}
-    )
+    await create_role_in_database({"id": role_id, "name": settings.SUPER_ROLE_NAME, "permissions": []})
 
     user_data = {
         "username": "johndoe",

@@ -30,12 +30,7 @@ class PostgresUserRepo(IUserRepository):
         return User.model_validate(user)
 
     async def update(self, user: User, info: UpdateUser) -> User:
-        stmt = (
-            update(UserDb)
-            .where(UserDb.id == user.id)
-            .values(**info.model_dump(exclude_none=True))
-            .returning(UserDb)
-        )
+        stmt = update(UserDb).where(UserDb.id == user.id).values(**info.model_dump(exclude_none=True)).returning(UserDb)
         result = await self._session.execute(stmt)
         await self._session.commit()
         updated_user = result.scalar_one()
@@ -48,23 +43,13 @@ class PostgresUserRepo(IUserRepository):
         deleted_id = result.scalar_one_or_none()
         return deleted_id
 
-    async def get_by_username(
-        self, name: str, exact_match: bool = False, case_sensitive: bool = False
-    ) -> list[User]:
+    async def get_by_username(self, name: str, exact_match: bool = False, case_sensitive: bool = False) -> list[User]:
         if exact_match:
             pattern = name
-            filter_expr = (
-                UserDb.username == pattern
-                if case_sensitive
-                else func.lower(UserDb.username) == pattern.lower()
-            )
+            filter_expr = UserDb.username == pattern if case_sensitive else func.lower(UserDb.username) == pattern.lower()
         else:
             pattern = f"%{name}%"
-            filter_expr = (
-                UserDb.username.like(pattern)
-                if case_sensitive
-                else UserDb.username.ilike(pattern)
-            )
+            filter_expr = UserDb.username.like(pattern) if case_sensitive else UserDb.username.ilike(pattern)
         stmt = select(UserDb).where(filter_expr)
         result = await self._session.execute(stmt)
         users = result.scalars().all()
@@ -79,9 +64,7 @@ class PostgresUserRepo(IUserRepository):
         words = [escape_tsquery(w.strip()) for w in name.split() if w.strip()]
         query = " & ".join(f"{word}:*" for word in words if word)
 
-        stmt = select(UserDb).where(
-            UserDb.full_name_tsv.op("@@")(func.to_tsquery("russian", query))
-        )
+        stmt = select(UserDb).where(UserDb.full_name_tsv.op("@@")(func.to_tsquery("russian", query)))
 
         result = await self._session.execute(stmt)
         users = result.scalars().all()
@@ -94,11 +77,6 @@ class PostgresUserRepo(IUserRepository):
         return [User.model_validate(u) for u in users]
 
     async def get_user_permissions(self, user_id: UUID) -> list[str]:
-        stmt = (
-            select(func.unnest(Role.permissions))
-            .select_from(UserDb)
-            .join(Role, Role.id == func.any(UserDb.role_ids))
-            .where(UserDb.id == user_id)
-        )
+        stmt = select(func.unnest(Role.permissions)).select_from(UserDb).join(Role, Role.id == func.any(UserDb.role_ids)).where(UserDb.id == user_id)
         result = await self._session.execute(stmt)
         return list(set(result.scalars().all()))

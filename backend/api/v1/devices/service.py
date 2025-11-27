@@ -85,8 +85,13 @@ class DeviceService:
         except DBException:
             raise AppExceptions.service_unavailable_exception("Database error.")
 
-    async def get_device_by_android_id(self, android_id: UUID) -> Device:
+    async def get_device_by_android_id(self, android_id: str) -> Device:
         try:
-            return await self._repo.get_by_android_id(android_id)
+            device = await self._repo.get_by_android_id(android_id)
+            if not device:
+                raise AppExceptions.not_found_exception(
+                    f"Device with this android id {android_id} not found"
+                )
+            return device
         except DBException:
             raise AppExceptions.service_unavailable_exception("Database error.")

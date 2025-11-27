@@ -53,9 +53,7 @@ async def test_delete_role_not_found(client, create_role_in_database):
     assert resp.json() == {"detail": "Role with this id not found"}
 
 
-async def test_delete_role_unauth(
-    client, create_role_in_database, get_project_settings
-):
+async def test_delete_role_unauth(client, create_role_in_database, get_project_settings):
     role_id = uuid4()
     role_info = {
         "id": role_id,
@@ -79,9 +77,7 @@ async def test_delete_role_unauth(
         assert resp.status_code == 200
 
 
-async def test_delete_role_no_permissions(
-    client, create_role_in_database, get_project_settings
-):
+async def test_delete_role_no_permissions(client, create_role_in_database, get_project_settings):
     role_id = uuid4()
     role_info = {
         "id": role_id,
@@ -118,9 +114,7 @@ async def test_delete_role_no_permissions(
                         "loc": ["path", "role_id"],
                         "msg": "Input should be a valid UUID, invalid length: expected length 32 for simple format, found 3",
                         "input": "123",
-                        "ctx": {
-                            "error": "invalid length: expected length 32 for simple format, found 3"
-                        },
+                        "ctx": {"error": "invalid length: expected length 32 for simple format, found 3"},
                     }
                 ]
             },
@@ -135,18 +129,14 @@ async def test_delete_role_no_permissions(
                         "loc": ["path", "role_id"],
                         "msg": "Input should be a valid UUID, invalid character: expected an optional prefix of `urn:uuid:` followed by [0-9a-fA-F-], found `n` at 1",
                         "input": "not-a-uuid",
-                        "ctx": {
-                            "error": "invalid character: expected an optional prefix of `urn:uuid:` followed by [0-9a-fA-F-], found `n` at 1"
-                        },
+                        "ctx": {"error": "invalid character: expected an optional prefix of `urn:uuid:` followed by [0-9a-fA-F-], found `n` at 1"},
                     }
                 ]
             },
         ),
     ],
 )
-async def test_delete_role_invalid_id(
-    client, bad_id, expected_status_code, expected_detail
-):
+async def test_delete_role_invalid_id(client, bad_id, expected_status_code, expected_detail):
     headers_for_auth = await create_auth_headers_for_user([Permissions.DELETE_ROLE])
 
     resp = client.delete(
@@ -158,9 +148,7 @@ async def test_delete_role_invalid_id(
     assert resp.json() == expected_detail
 
 
-async def test_delete_role_bad_credentials(
-    client, create_role_in_database, get_project_settings
-):
+async def test_delete_role_bad_credentials(client, create_role_in_database, get_project_settings):
     role_id = uuid4()
     role_info = {
         "id": role_id,
@@ -184,9 +172,7 @@ async def test_delete_role_bad_credentials(
         assert resp.status_code == 200
 
 
-async def test_delete_role_super_admin_not_allowed(
-    client, create_role_in_database, get_role_from_database, get_project_settings
-):
+async def test_delete_role_super_admin_not_allowed(client, create_role_in_database, get_role_from_database, get_project_settings):
     role_id = uuid4()
     settings = await get_project_settings()
     role_info = {

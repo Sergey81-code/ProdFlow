@@ -20,16 +20,12 @@ class JWT:
             token_time = settings.TOKEN_EXPIRE_MINUTES
 
         to_encode = data.copy()
-        expire = datetime.datetime.now(datetime.timezone.utc) + (
-            expires_delta or datetime.timedelta(minutes=token_time)
-        )
+        expire = datetime.datetime.now(datetime.timezone.utc) + (expires_delta or datetime.timedelta(minutes=token_time))
         to_encode.update({"exp": expire})
         return jwt.encode(to_encode, token_key, algorithm=settings.ALGORITHM)
 
     @staticmethod
-    async def decode_jwt_token(
-        token: str, token_type: str = "access"
-    ) -> dict[str, str]:
+    async def decode_jwt_token(token: str, token_type: str = "access") -> dict[str, str]:
         if token_type == "access":
             token_key = settings.SECRET_KEY_FOR_ACCESS
         try:

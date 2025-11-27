@@ -20,9 +20,7 @@ class TestDAL:
         if self.pool:
             await self.pool.close()
 
-    async def get_obj_from_database_by_id(
-        self, tablename: str, obj_id: UUID
-    ) -> asyncpg.Record | None:
+    async def get_obj_from_database_by_id(self, tablename: str, obj_id: UUID) -> asyncpg.Record | None:
         query = f"""
             SELECT * FROM {tablename}
             WHERE id = $1
@@ -30,9 +28,7 @@ class TestDAL:
         async with self.pool.acquire() as connection:
             return await connection.fetchrow(query, obj_id)
 
-    async def get_all(
-        self, tablename: str, object_filters: list[Callable[[str], str]] | None = None
-    ) -> list[asyncpg.Record] | list:
+    async def get_all(self, tablename: str, object_filters: list[Callable[[str], str]] | None = None) -> list[asyncpg.Record] | list:
         query = f"""SELECT * FROM {tablename}"""
 
         if object_filters:
@@ -67,16 +63,12 @@ class TestDAL:
                         enum_member = enum_class(val)
                         new_obj[column.name] = enum_member.value.upper()
                     except ValueError:
-                        raise ValueError(
-                            f"Invalid enum value '{val}' for {column.name}"
-                        )
+                        raise ValueError(f"Invalid enum value '{val}' for {column.name}")
                 else:
                     pass
         return new_obj
 
-    async def create_object_in_database(
-        self, tablename: str, obj: dict, field_to_return: str = "id"
-    ) -> str | None:
+    async def create_object_in_database(self, tablename: str, obj: dict, field_to_return: str = "id") -> str | None:
         table = await self.get_sqla_model_by_tablename(tablename)
         if table is not None:
             obj = await self.auto_cast_enum_values(obj, table)

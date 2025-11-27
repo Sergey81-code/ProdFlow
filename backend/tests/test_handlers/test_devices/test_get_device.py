@@ -237,3 +237,96 @@ async def test_get_devices_wrong_token(
         assert resp.json() == {"detail": "Could not validate credentials"}
     else:
         assert resp.status_code == 200
+
+
+async def test_get_device_by_android_id(
+    client, create_device_in_database, get_device_from_database
+):
+    device_id = uuid4()
+    android_id = "a3f9c2b7d18e44fa"
+    device_info = {"name": "test device", "android_id": android_id}
+
+    await create_device_in_database({"id": device_id, **device_info})
+    headers = await create_auth_headers_for_user([Permissions.GET_DEVICES])
+
+    resp = client.get(
+        f"{VERSION_URL}{DEVICE_URL}/android/{android_id}", headers=headers
+    )
+
+    assert resp.status_code == 200
+    data = resp.json()
+
+    assert data["id"] == str(device_id)
+    assert data["name"] == device_info["name"]
+    assert data["android_id"] == android_id
+
+    device_from_db = await get_device_from_database(device_id)
+    assert device_from_db["android_id"] == android_id
+
+
+async def test_get_device_by_android_id_not_found(client):
+    headers = await create_auth_headers_for_user([Permissions.GET_DEVICES])
+    android_id = "non_existing_android_id"
+
+    resp = client.get(
+        f"{VERSION_URL}{DEVICE_URL}/android/{android_id}", headers=headers
+    )
+
+    assert resp.status_code == 404
+    assert resp.json() == {
+        "detail": f"Device with this android id {android_id} not found"
+    }
+
+
+async def test_get_device_by_android_id_unauthorized(
+    client, create_device_in_database, get_device_from_database
+):
+    device_id = uuid4()
+    android_id = "a3f9c2b7d18e44fa"
+
+    device_info = {"name": "test device", "android_id": android_id}
+
+    await create_device_in_database({"id": device_id, **device_info})
+
+    resp = client.get(f"{VERSION_URL}{DEVICE_URL}/android/{android_id}")
+    assert resp.status_code == 200
+    data = resp.json()
+
+    assert data["id"] == str(device_id)
+    assert data["name"] == device_info["name"]
+    assert data["android_id"] == android_id
+
+    device_from_db = await get_device_from_database(device_id)
+    assert device_from_db["android_id"] == android_id
+
+
+@pytest.mark.parametrize(
+    "bad_android_id, expected_status_code, expected_detail",
+    [
+        ("", 403, {"detail": "Not authenticated"}),
+        (
+            None,
+            404,
+            {"detail": "Device with this android id None not found"},
+        ),
+    ],
+)
+async def test_get_device_by_android_id_invalid(
+    client,
+    create_device_in_database,
+    bad_android_id,
+    expected_status_code,
+    expected_detail,
+):
+    device_id = uuid4()
+
+    await create_device_in_database(
+        {"id": device_id, "name": "some device", "android_id": "valid_android_id"}
+    )
+
+    resp = client.get(
+        f"{VERSION_URL}{DEVICE_URL}/android/{bad_android_id}",
+    )
+
+    assert resp.status_code == expected_status_code
+    assert resp.json() == expected_detail

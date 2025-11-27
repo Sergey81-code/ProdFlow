@@ -22,9 +22,7 @@ class IDeviceRepository(ABC):
         pass
 
     @abstractmethod
-    async def get_by_name(
-        self, name: str, exact_match: bool = False, case_sensitive: bool = False
-    ) -> list[Device]:
+    async def get_by_name(self, name: str, exact_match: bool = False, case_sensitive: bool = False) -> list[Device]:
         pass
 
     @abstractmethod

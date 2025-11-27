@@ -2,13 +2,27 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends
 
-from api.core.dependencies.jwt_access import permission_required
+from api.core.dependencies.jwt_access import get_user_token, permission_required
 from api.core.dependencies.services import get_user_service
+from api.core.exceptions import AppExceptions
 from api.v1.users.schemas import CreateUser, ShowUser, UpdateUser
 from api.v1.users.service import UserService
 from config.permissions import Permissions
 
 router = APIRouter()
+
+
+@router.get("/me", response_model=ShowUser)
+async def get_me(
+    user_decode_token: dict = Depends(get_user_token),
+    user_service: UserService = Depends(get_user_service),
+) -> ShowUser:
+    username = user_decode_token.get("sub")
+
+    if not username:
+        raise AppExceptions.unauthorized_exception("Invalid token: username not found")
+
+    return await user_service.get_user_by_username(username)
 
 
 @router.get(

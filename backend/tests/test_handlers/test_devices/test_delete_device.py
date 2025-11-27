@@ -8,9 +8,7 @@ from tests.conftest import DEVICE_URL, VERSION_URL
 from tests.utils_for_tests import create_auth_headers_for_user
 
 
-async def test_delete_device(
-    client, create_device_in_database, get_device_from_database
-):
+async def test_delete_device(client, create_device_in_database, get_device_from_database):
     device_id = uuid4()
     device_info = {
         "id": device_id,
@@ -45,13 +43,9 @@ async def test_delete_device_not_found(client):
     assert resp.json() == {"detail": "Device with this id not found"}
 
 
-async def test_delete_device_unauth(
-    client, create_device_in_database, get_project_settings
-):
+async def test_delete_device_unauth(client, create_device_in_database, get_project_settings):
     device_id = uuid4()
-    await create_device_in_database(
-        {"id": device_id, "name": "Unauth Device", "android_id": "a4f9c2b7d18e44fa"}
-    )
+    await create_device_in_database({"id": device_id, "name": "Unauth Device", "android_id": "a4f9c2b7d18e44fa"})
 
     bad_headers = {"Authorization": "Bearer wrongtoken"}
 
@@ -68,9 +62,7 @@ async def test_delete_device_unauth(
         assert resp.status_code == 200
 
 
-async def test_delete_device_no_permissions(
-    client, create_device_in_database, get_project_settings
-):
+async def test_delete_device_no_permissions(client, create_device_in_database, get_project_settings):
     device_id = uuid4()
     await create_device_in_database(
         {
@@ -108,9 +100,7 @@ async def test_delete_device_no_permissions(
                         "loc": ["path", "device_id"],
                         "msg": "Input should be a valid UUID, invalid length: expected length 32 for simple format, found 3",
                         "input": "123",
-                        "ctx": {
-                            "error": "invalid length: expected length 32 for simple format, found 3"
-                        },
+                        "ctx": {"error": "invalid length: expected length 32 for simple format, found 3"},
                     }
                 ]
             },
@@ -125,18 +115,14 @@ async def test_delete_device_no_permissions(
                         "loc": ["path", "device_id"],
                         "msg": "Input should be a valid UUID, invalid character: expected an optional prefix of `urn:uuid:` followed by [0-9a-fA-F-], found `n` at 1",
                         "input": "not-a-uuid",
-                        "ctx": {
-                            "error": "invalid character: expected an optional prefix of `urn:uuid:` followed by [0-9a-fA-F-], found `n` at 1"
-                        },
+                        "ctx": {"error": "invalid character: expected an optional prefix of `urn:uuid:` followed by [0-9a-fA-F-], found `n` at 1"},
                     }
                 ]
             },
         ),
     ],
 )
-async def test_delete_device_invalid_id(
-    client, bad_id, expected_status_code, expected_detail
-):
+async def test_delete_device_invalid_id(client, bad_id, expected_status_code, expected_detail):
     headers_for_auth = await create_auth_headers_for_user([Permissions.DELETE_DEVICE])
 
     resp = client.delete(
@@ -148,9 +134,7 @@ async def test_delete_device_invalid_id(
     assert resp.json() == expected_detail
 
 
-async def test_delete_device_bad_credentials(
-    client, create_device_in_database, get_project_settings
-):
+async def test_delete_device_bad_credentials(client, create_device_in_database, get_project_settings):
     device_id = uuid4()
     await create_device_in_database(
         {
