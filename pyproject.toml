@@ -1,0 +1,45 @@
+[project]
+name = "backend"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "alembic>=1.14.1",
+    "asyncpg>=0.30.0",
+    "bcrypt==4.0.1",
+    "celery[beat,redis]>=5.5.3",
+    "email-validator>=2.2.0",
+    "envparse>=0.2.0",
+    "fastapi>=0.115.8",
+    "httpx>=0.28.1",
+    "passlib>=1.7.4",
+    "psycopg2>=2.9.10",
+    "pydantic-settings>=2.8.0",
+    "pytest>=8.3.4",
+    "pytest-asyncio>=0.25.3",
+    "python-jose>=3.3.0",
+    "python-multipart>=0.0.20",
+    "ruff>=0.14.1",
+    "sqlalchemy>=2.0.38",
+    "uuid7>=0.1.0",
+    "uvicorn>=0.34.0",
+]
+
+[tool.black]
+line-length = 88
+target-version = ['py312']
+
+[tool.ruff]
+line-length = 200
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["I", "F", "E"]
+fixable = ["I", "F", "E"]
+
+[tool.isort]
+profile = "black"
+line_length = 200
+multi_line_output = 3
+include_trailing_comma = true
