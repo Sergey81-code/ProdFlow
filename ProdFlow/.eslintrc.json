@@ -12,11 +12,7 @@
     "es2021": true,
     "node": true
   },
-  "plugins": [
-    "@typescript-eslint",
-    "react",
-    "import"
-  ],
+  "plugins": ["@typescript-eslint", "react", "import"],
   "extends": [
     "eslint:recommended",
     "plugin:react/recommended",

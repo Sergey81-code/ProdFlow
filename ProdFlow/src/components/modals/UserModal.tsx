@@ -1,8 +1,8 @@
-import { Button, Form,Modal } from 'antd';
+import { Button, Form, Modal } from 'antd';
 import React, { useEffect } from 'react';
 
 import { RoleDto } from '../../types/role';
-import { UserCreateDto,UserDto } from '../../types/user';
+import { UserCreateDto, UserDto } from '../../types/user';
 import UserForm from '../forms/UserForm';
 import ProdFlowButton from '../ui/Button';
 
@@ -38,16 +38,13 @@ export const UserModal: React.FC<Props> = ({
     onClose();
   };
 
-const handleFinish = async (vals: UserCreateDto) => {
-  const success = await onSubmit(vals);
-  if (success) {
-    form.resetFields();
-    onClose();
-  }
-};
-
-
-
+  const handleFinish = async (vals: UserCreateDto) => {
+    const success = await onSubmit(vals);
+    if (success) {
+      form.resetFields();
+      onClose();
+    }
+  };
 
   return (
     <Modal

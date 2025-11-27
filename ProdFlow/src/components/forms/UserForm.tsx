@@ -1,4 +1,4 @@
-import { Form, FormInstance,Input, Select } from 'antd';
+import { Form, FormInstance, Input, Select } from 'antd';
 
 import { RoleDto } from '../../types/role';
 import { UserCreateDto } from '../../types/user';

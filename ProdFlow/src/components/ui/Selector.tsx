@@ -1,5 +1,5 @@
 import { DownOutlined } from '@ant-design/icons';
-import { Button,Dropdown } from 'antd';
+import { Button, Dropdown } from 'antd';
 import React from 'react';
 
 export interface SelectorItem {

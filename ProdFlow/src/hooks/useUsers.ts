@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { createUser, deleteUser,getUsers, updateUser } from '../api';
+import { createUser, deleteUser, getUsers, updateUser } from '../api';
 import { UserCreateDto, UserDto } from '../types/user';
 
 const USERS_KEY = ['users'];

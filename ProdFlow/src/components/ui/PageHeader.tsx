@@ -1,5 +1,5 @@
 import { MenuOutlined } from '@ant-design/icons';
-import { Button,Layout, Space, Typography } from 'antd';
+import { Button, Layout, Space, Typography } from 'antd';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 

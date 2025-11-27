@@ -1,14 +1,14 @@
-import { Button, Form,Modal } from 'antd';
+import { Button, Form, Modal } from 'antd';
 import React, { useEffect } from 'react';
 
-import { DeviceCreateDto,DeviceDto } from '../../types/device';
+import { DeviceCreateDto, DeviceDto } from '../../types/device';
 import DeviceForm from '../forms/DeviceForm';
 import ProdFlowButton from '../ui/Button';
 
 interface Props {
   visible: boolean;
   onClose: () => void;
-  onSubmit: (vals: DeviceCreateDto)  => Promise<boolean>;
+  onSubmit: (vals: DeviceCreateDto) => Promise<boolean>;
   editingDevice?: DeviceDto | null;
 }
 

@@ -3,7 +3,7 @@ import Editor from '@monaco-editor/react';
 import { Button, List, message, Modal, Spin, Tag } from 'antd';
 import React, { useEffect, useState } from 'react';
 
-import { getLogFile,getLogs } from '../../api/index';
+import { getLogFile, getLogs } from '../../api/index';
 
 interface Props {
   visible: boolean;

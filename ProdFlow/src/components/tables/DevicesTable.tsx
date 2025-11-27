@@ -1,6 +1,6 @@
 import { MoreOutlined } from '@ant-design/icons';
-import { Button, Dropdown,Space, Table } from 'antd';
-import React, { useEffect,useMemo, useState } from 'react';
+import { Button, Dropdown, Space, Table } from 'antd';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import { DeviceDto } from '../../types/device';
 

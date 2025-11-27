@@ -1,5 +1,5 @@
-import { MobileOutlined,TableOutlined, TeamOutlined } from '@ant-design/icons';
-import { Card,Col, Row } from 'antd';
+import { MobileOutlined, TableOutlined, TeamOutlined } from '@ant-design/icons';
+import { Card, Col, Row } from 'antd';
 import React from 'react';
 
 import { ConfirmDelete } from '../components/common/ConfirmDelete';

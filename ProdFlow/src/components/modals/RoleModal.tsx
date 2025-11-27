@@ -1,14 +1,14 @@
-import { Button, Form,Modal } from 'antd';
+import { Button, Form, Modal } from 'antd';
 import React, { useEffect } from 'react';
 
-import { RoleCreateDto,RoleDto } from '../../types/role';
+import { RoleCreateDto, RoleDto } from '../../types/role';
 import RoleForm from '../forms/RoleForm';
 import ProdFlowButton from '../ui/Button';
 
 interface Props {
   visible: boolean;
   onClose: () => void;
-  onSubmit: (vals: RoleCreateDto)  => Promise<boolean>;
+  onSubmit: (vals: RoleCreateDto) => Promise<boolean>;
   editingRole?: RoleDto | null;
 }
 

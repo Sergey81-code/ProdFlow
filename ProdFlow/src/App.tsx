@@ -2,7 +2,7 @@ import './App.css';
 
 import { Layout } from 'antd';
 import React, { useState } from 'react';
-import { Route,Routes } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import { LogsModal } from './components/modals/LogModal';

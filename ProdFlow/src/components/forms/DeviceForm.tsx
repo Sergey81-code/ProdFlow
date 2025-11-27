@@ -1,4 +1,4 @@
-import { Form, FormInstance,Input } from 'antd';
+import { Form, FormInstance, Input } from 'antd';
 import React from 'react';
 
 import { DeviceCreateDto } from '../../types/device';
