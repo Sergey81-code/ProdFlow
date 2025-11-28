@@ -1,8 +1,8 @@
 import json
 import time
+from collections.abc import Mapping
 from typing import Callable
 from urllib.parse import parse_qsl, urlencode
-from collections.abc import Mapping
 
 from fastapi import Request, Response, UploadFile
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -33,14 +33,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
             obj = dict(obj)
 
         if isinstance(obj, dict):
-            return {
-                k: (
-                    "********"
-                    if any(secret in k.lower() for secret in self.SECRET_FIELDS)
-                    else self.mask_secrets(v)
-                )
-                for k, v in obj.items()
-            }
+            return {k: ("********" if any(secret in k.lower() for secret in self.SECRET_FIELDS) else self.mask_secrets(v)) for k, v in obj.items()}
 
         elif isinstance(obj, list):
             return [self.mask_secrets(i) for i in obj]
