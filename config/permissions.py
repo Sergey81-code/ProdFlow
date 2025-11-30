@@ -17,4 +17,9 @@ class Permissions(StrEnum):
     GET_USERS = "get_users"
     UPDATE_USER = "update_user"
 
+    CREATE_DEPARTMENT = "create_department"
+    DELETE_DEPARTMENT = "delete_department"
+    GET_DEPARTMENTS = "get_departments"
+    UPDATE_DEPARTMENT = "update_department"
+
     GET_LOGS = "get_logs"

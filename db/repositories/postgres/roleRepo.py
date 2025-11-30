@@ -26,7 +26,12 @@ class PostgresRoleRepo(IRoleRepository):
         return Role.model_validate(role)
 
     async def update(self, role: Role, info: UpdateRole) -> Role:
-        stmt = update(RoleDb).where(RoleDb.id == role.id).values(**info.model_dump(exclude_none=True)).returning(RoleDb)
+        stmt = (
+            update(RoleDb)
+            .where(RoleDb.id == role.id)
+            .values(**info.model_dump(exclude_none=True))
+            .returning(RoleDb)
+        )
         result = await self._session.execute(stmt)
         await self._session.commit()
         updated_role = result.scalar_one()
@@ -39,13 +44,23 @@ class PostgresRoleRepo(IRoleRepository):
         deleted_id = result.scalar_one_or_none()
         return deleted_id
 
-    async def get_by_name(self, name: str, exact_match: bool = False, case_sensitive: bool = False) -> list[Role]:
+    async def get_by_name(
+        self, name: str, exact_match: bool = False, case_sensitive: bool = False
+    ) -> list[Role]:
         if exact_match:
             pattern = name
-            filter_expr = RoleDb.name == pattern if case_sensitive else func.lower(RoleDb.name) == pattern.lower()
+            filter_expr = (
+                RoleDb.name == pattern
+                if case_sensitive
+                else func.lower(RoleDb.name) == pattern.lower()
+            )
         else:
             pattern = f"%{name}%"
-            filter_expr = RoleDb.name.like(pattern) if case_sensitive else RoleDb.name.ilike(pattern)
+            filter_expr = (
+                RoleDb.name.like(pattern)
+                if case_sensitive
+                else RoleDb.name.ilike(pattern)
+            )
 
         stmt = select(RoleDb).where(filter_expr)
         result = await self._session.execute(stmt)

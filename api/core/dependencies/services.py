@@ -4,6 +4,7 @@ from api.core.dependencies.repositories import (
     get_device_repository,
     get_role_repository,
     get_user_repository,
+    get_department_repository,
 )
 from api.v1.auth.service import AuthService
 from api.v1.devices.repo_interface import IDeviceRepository
@@ -12,6 +13,8 @@ from api.v1.roles.repo_interface import IRoleRepository
 from api.v1.roles.service import RoleService
 from api.v1.users.repo_interface import IUserRepository
 from api.v1.users.service import UserService
+from api.v1.departments.repo_interface import IDepartmentRepository
+from api.v1.departments.service import DepartmentService
 
 
 async def get_role_service(
@@ -37,3 +40,9 @@ async def get_auth_service(
     repo: IDeviceRepository = Depends(get_user_repository),
 ):
     return AuthService(repo)
+
+
+async def get_department_service(
+    repo: IDepartmentRepository = Depends(get_department_repository),
+):
+    return DepartmentService(repo)

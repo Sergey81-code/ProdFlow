@@ -19,7 +19,7 @@ settings = get_settings()
 
 DSN_FOR_TESTDAL = "".join(settings.TEST_DATABASE_URL.split("+asyncpg"))
 
-CLEAN_TABLES = ["users", "roles", "devices"]
+CLEAN_TABLES = ["users", "roles", "devices", "departments"]
 
 VERSION_URL = "/v1"
 USER_URL = "/users"
@@ -62,15 +62,21 @@ async def clean_tables(async_session_test: AsyncSession):
     TRUNCATE TABLE {tables}
     RESTART IDENTITY
     CASCADE;
-    """.format(tables=",".join(CLEAN_TABLES))
+    """.format(
+        tables=",".join(CLEAN_TABLES)
+    )
 
     async with async_session_test.begin() as session:
         await session.execute(sqlalchemy.text(query))
 
 
 async def _get_test_session():
-    test_engine = create_async_engine(settings.TEST_DATABASE_URL, future=True, echo=True)
-    test_async_session = sessionmaker(test_engine, expire_on_commit=False, class_=AsyncSession)
+    test_engine = create_async_engine(
+        settings.TEST_DATABASE_URL, future=True, echo=True
+    )
+    test_async_session = sessionmaker(
+        test_engine, expire_on_commit=False, class_=AsyncSession
+    )
     async with test_async_session() as session:
         yield session
 
@@ -116,7 +122,9 @@ async def get_user_from_database() -> Callable[[UUID], dict[str, Any] | None]:
                 roles = await dal.get_all(
                     "roles",
                 )
-                user["roles"] = [role for role in roles if role["id"] in user["role_ids"]]
+                user["roles"] = [
+                    role for role in roles if role["id"] in user["role_ids"]
+                ]
             return user
 
     return get_user_from_database_by_id
@@ -160,6 +168,17 @@ async def create_device_in_database() -> Callable[[dict[str | list[dict[str]]]],
     async def create_device_in_database(device_info) -> str:
         async with TestDAL(DSN_FOR_TESTDAL) as dal:
             return await dal.create_object_in_database("devices", device_info)
+
+    return create_device_in_database
+
+
+@pytest.fixture
+async def create_department_in_database() -> (
+    Callable[[dict[str | list[dict[str]]]], str]
+):
+    async def create_device_in_database(departmnet_info) -> str:
+        async with TestDAL(DSN_FOR_TESTDAL) as dal:
+            return await dal.create_object_in_database("departments", departmnet_info)
 
     return create_device_in_database
 
