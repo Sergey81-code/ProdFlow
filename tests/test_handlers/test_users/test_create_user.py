@@ -8,16 +8,20 @@ from tests.conftest import USER_URL, VERSION_URL
 from tests.utils_for_tests import create_auth_headers_for_user
 
 
-async def test_create_user_success(client, get_user_from_database, create_role_in_database):
+async def test_create_user_success(
+    client, get_user_from_database, create_role_in_database
+):
     role_id = uuid4()
-    await create_role_in_database({"id": role_id, "name": "employee", "permissions": []})
+    await create_role_in_database(
+        {"id": role_id, "name": "employee", "permissions": []}
+    )
 
     user_data = {
         "username": "johndoe",
         "first_name": "John",
         "last_name": "Doe",
         "patronymic": "Martin",
-        "finger_token": "some_token123",
+        "employee_number": "some_token123",
         "password": "StrongPass123!",
         "role_ids": [str(role_id)],
     }
@@ -34,16 +38,16 @@ async def test_create_user_success(client, get_user_from_database, create_role_i
     assert data["first_name"] == user_data["first_name"]
     assert data["last_name"] == user_data["last_name"]
     assert data["patronymic"] == user_data["patronymic"]
-    assert data["finger_token"] == user_data["finger_token"]
-    assert data["role_ids"] == [str(role_id)]
+    assert data["employee_number"] == user_data["employee_number"]
+    assert [str(role_id)] == [role["id"] for role in data["roles"]]
 
     user_from_db: dict[str, Any] = await get_user_from_database(data["id"])
     assert user_from_db["username"] == user_data["username"]
     assert user_from_db["first_name"] == user_data["first_name"]
     assert user_from_db["last_name"] == user_data["last_name"]
     assert user_from_db["patronymic"] == user_data["patronymic"]
-    assert user_from_db["finger_token"] == user_data["finger_token"]
-    assert user_from_db["role_ids"] == [role_id]
+    assert user_from_db["employee_number"] == user_data["employee_number"]
+    assert set([role_id]) == set([role["id"] for role in user_from_db["roles"]])
 
 
 @pytest.mark.parametrize(
@@ -54,7 +58,14 @@ async def test_create_user_success(client, get_user_from_database, create_role_i
         ("MiXeDCase", "mixedcase"),
     ],
 )
-async def test_create_user_duplicate_username_case_insensitive(client, create_user_in_database, existing, new):
+async def test_create_user_duplicate_username_case_insensitive(
+    client, create_user_in_database, create_role_in_database, existing, new
+):
+    role_id = uuid4()
+    await create_role_in_database(
+        {"id": role_id, "name": "employee", "permissions": []}
+    )
+
     await create_user_in_database(
         {
             "id": uuid4(),
@@ -72,6 +83,7 @@ async def test_create_user_duplicate_username_case_insensitive(client, create_us
             "first_name": "A",
             "last_name": "B",
             "password": "StrongPass123!",
+            "role_ids": [str(role_id)],
         },
         headers=await create_auth_headers_for_user([Permissions.CREATE_USER]),
     )
@@ -84,7 +96,12 @@ async def test_create_user_duplicate_username_case_insensitive(client, create_us
     "password",
     ["", "short", "123", "abcdef", None],
 )
-async def test_create_user_invalid_password(client, password):
+async def test_create_user_invalid_password(client, password, create_role_in_database):
+    role_id = uuid4()
+    await create_role_in_database(
+        {"id": role_id, "name": "employee", "permissions": []}
+    )
+
     resp = client.post(
         f"{VERSION_URL}{USER_URL}/",
         json={
@@ -92,6 +109,7 @@ async def test_create_user_invalid_password(client, password):
             "first_name": "A",
             "last_name": "B",
             "password": password,
+            "role_ids": [str(role_id)],
         },
         headers=await create_auth_headers_for_user([Permissions.CREATE_USER]),
     )
@@ -135,9 +153,17 @@ async def test_create_user_not_authenticated(client, get_project_settings):
         assert resp.status_code == 200
 
 
-async def test_create_user_bad_token(client, get_project_settings):
+async def test_create_user_bad_token(
+    client, get_project_settings, create_role_in_database
+):
+    role_id = uuid4()
+    await create_role_in_database(
+        {"id": role_id, "name": "employee", "permissions": []}
+    )
+
     headers = await create_auth_headers_for_user([Permissions.CREATE_USER])
     bad = {k: v + "broken" for k, v in headers.items()}
+
     resp = client.post(
         f"{VERSION_URL}{USER_URL}/",
         json={
@@ -145,9 +171,11 @@ async def test_create_user_bad_token(client, get_project_settings):
             "first_name": "A",
             "last_name": "B",
             "password": "Pass123!",
+            "role_ids": [str(role_id)],
         },
         headers=bad,
     )
+
     settings = await get_project_settings()
     if settings.ENABLE_PERMISSION_CHECK:
         assert resp.status_code == 401
@@ -156,7 +184,14 @@ async def test_create_user_bad_token(client, get_project_settings):
         assert resp.status_code == 200
 
 
-async def test_create_user_no_permission(client, get_project_settings):
+async def test_create_user_no_permission(
+    client, get_project_settings, create_role_in_database
+):
+    role_id = uuid4()
+    await create_role_in_database(
+        {"id": role_id, "name": "employee", "permissions": []}
+    )
+
     resp = client.post(
         f"{VERSION_URL}{USER_URL}/",
         json={
@@ -164,9 +199,11 @@ async def test_create_user_no_permission(client, get_project_settings):
             "first_name": "A",
             "last_name": "B",
             "password": "Pass123!",
+            "role_ids": [str(role_id)],
         },
         headers=await create_auth_headers_for_user([Permissions.GET_USERS]),
     )
+
     settings = await get_project_settings()
     if settings.ENABLE_PERMISSION_CHECK:
         assert resp.status_code == 403
@@ -182,12 +219,7 @@ async def test_create_user_no_permission(client, get_project_settings):
         ({"username": "a"}, ["first_name", "last_name"]),
         ({"first_name": "A", "last_name": "B"}, ["username"]),
         (
-            {
-                "username": "",
-                "first_name": "A",
-                "last_name": "B",
-                "password": "StrongPass123!",
-            },
+            {"username": "", "first_name": "A", "last_name": "B", "password": "Strong"},
             ["username"],
         ),
         (
@@ -195,7 +227,7 @@ async def test_create_user_no_permission(client, get_project_settings):
                 "username": "test",
                 "first_name": "",
                 "last_name": "B",
-                "password": "StrongPass123!",
+                "password": "Strong",
             },
             ["first_name"],
         ),
@@ -204,7 +236,7 @@ async def test_create_user_no_permission(client, get_project_settings):
                 "username": "test",
                 "first_name": "A",
                 "last_name": "",
-                "password": "StrongPass123!",
+                "password": "Strong",
             },
             ["last_name"],
         ),
@@ -214,22 +246,37 @@ async def test_create_user_no_permission(client, get_project_settings):
         ),
     ],
 )
-async def test_create_user_validation(client, body, expected_missing):
+async def test_create_user_validation(
+    client, body, expected_missing, create_role_in_database
+):
+    role_id = uuid4()
+    await create_role_in_database(
+        {"id": role_id, "name": "employee", "permissions": []}
+    )
+
+    body = {**body, "role_ids": [str(role_id)]}
+
     resp = client.post(
         f"{VERSION_URL}{USER_URL}/",
         json=body,
         headers=await create_auth_headers_for_user([Permissions.CREATE_USER]),
     )
+
     assert resp.status_code == 422
     error = str(resp.json())
     for f in expected_missing:
-        assert f in error, f"Field '{f}' is missing in error: {error}"
+        assert f in error
 
 
-async def test_create_user_super_admin_not_allowed(client, create_role_in_database, get_project_settings):
+async def test_create_user_super_admin_not_allowed(
+    client, create_role_in_database, get_project_settings
+):
     role_id = uuid4()
     settings = await get_project_settings()
-    await create_role_in_database({"id": role_id, "name": settings.SUPER_ROLE_NAME, "permissions": []})
+
+    await create_role_in_database(
+        {"id": role_id, "name": settings.SUPER_ROLE_NAME, "permissions": []}
+    )
 
     user_data = {
         "username": "johndoe",

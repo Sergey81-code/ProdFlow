@@ -6,7 +6,7 @@ from sqlalchemy import delete, select
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from db.models import User
+from db.models import User, UserRole
 from db.session import get_session
 
 
@@ -21,16 +21,20 @@ async def delete_superadmin(username, session):
     """Delete a superadmin in the database"""
     async with session.begin():
         exists = await session.execute(select(User).where(User.username == username))
-        user = exists.scalar_one_or_none()
+        user = exists.unique().scalar_one_or_none()
 
         if not user:
             print("Error: A user with this username does not exist.")
             return
 
-        query = delete(User).where(User.username == username)
+        query_to_delete_user = delete(User).where(User.username == username)
+        query_to_delete_role_relation = delete(UserRole).where(
+            UserRole.user_id == user.id
+        )
 
         try:
-            await session.execute(query)
+            await session.execute(query_to_delete_role_relation)
+            await session.execute(query_to_delete_user)
             await session.commit()
             print(f"Superadmin {username} was deleted successfully!")
         except Exception as e:

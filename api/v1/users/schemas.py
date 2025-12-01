@@ -1,5 +1,5 @@
 from uuid import UUID
-
+from typing import TYPE_CHECKING
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from config.validation import Validation
@@ -11,6 +11,11 @@ class TundeModel(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class UserRole(TundeModel):
+    id: UUID
+    name: str
+
+
 class User(TundeModel):
     id: UUID
     username: str
@@ -18,8 +23,9 @@ class User(TundeModel):
     last_name: str
     patronymic: str | None = None
     password: str | None = None
-    finger_token: str | None = None
-    role_ids: list[UUID] | None = []
+    employee_number: str | None = None
+    roles: list[UserRole] | None = []
+    department_id: UUID | None = None
 
 
 class ShowUser(TundeModel):
@@ -28,9 +34,10 @@ class ShowUser(TundeModel):
     first_name: str
     last_name: str
     patronymic: str | None = None
-    finger_token: str | None = None
-    role_ids: list[UUID] | None = []
+    employee_number: str | None = None
+    roles: list[UserRole] | None = []
     password: str | None = None
+    department_id: UUID | None = None
 
 
 class CreateUser(BaseModel):
@@ -39,8 +46,9 @@ class CreateUser(BaseModel):
     last_name: str = Field(min_length=1, max_length=99)
     patronymic: str | None = None
     password: str | None = None
-    finger_token: str | None = None
-    role_ids: list[UUID] | None = []
+    employee_number: str | None = None
+    role_ids: list[UUID] | None = None
+    department_id: UUID | None = None
 
     @field_validator("password")
     def validate_password(cls, value):
@@ -59,8 +67,8 @@ class CreateUser(BaseModel):
             raise ValueError("Field length must be <= 99 characters")
         return value.strip()
 
-    @field_validator("finger_token")
-    def validate_finger_token(cls, value):
+    @field_validator("employee_number")
+    def validate_employee_number(cls, value):
         if value is None:
             return None
         if len(value) > 64:
@@ -75,7 +83,8 @@ class UpdateUser(BaseModel):
     patronymic: str | None = None
     role_ids: list[UUID] | None = None
     password: str | None = None
-    finger_token: str | None = None
+    employee_number: str | None = None
+    department_id: UUID | None = None
 
     @field_validator("password")
     def validate_password(cls, value):
@@ -106,8 +115,8 @@ class UpdateUser(BaseModel):
             raise ValueError("Field length must be <= 99 characters")
         return value.strip()
 
-    @field_validator("finger_token")
-    def validate_finger_token(cls, value):
+    @field_validator("employee_number")
+    def validate_employee_number(cls, value):
         if value is None:
             return None
         if len(value) > 64:

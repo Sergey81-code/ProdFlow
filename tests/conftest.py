@@ -19,7 +19,7 @@ settings = get_settings()
 
 DSN_FOR_TESTDAL = "".join(settings.TEST_DATABASE_URL.split("+asyncpg"))
 
-CLEAN_TABLES = ["users", "roles", "devices", "departments"]
+CLEAN_TABLES = ["users", "roles", "devices", "departments", "user_roles"]
 
 VERSION_URL = "/v1"
 USER_URL = "/users"
@@ -107,7 +107,23 @@ async def get_role_from_database() -> Callable[[UUID], dict[str, Any] | None]:
     async def get_role_from_database_by_id(obj_id: UUID) -> dict[str, Any] | None:
         async with TestDAL(DSN_FOR_TESTDAL) as dal:
             role = await dal.get_obj_from_database_by_id("roles", obj_id)
-            return dict(role) if role else None
+            if not role:
+                return None
+            role = dict(role)
+            user_ids = await dal.get_all(
+                "user_roles",
+                [lambda tablename: f"{tablename}.role_id = '{role["id"]}'"],
+            )
+            users = []
+            if user_ids:
+                users = await dal.get_all(
+                    "users",
+                    [
+                        lambda tablename: f"{tablename}.id IN ({",".join(f"'{dict(uid)["user_id"]}'" for uid in user_ids)})"
+                    ],
+                )
+            role["users"] = users
+            return role
 
     return get_role_from_database_by_id
 
@@ -119,15 +135,35 @@ async def get_user_from_database() -> Callable[[UUID], dict[str, Any] | None]:
             user = await dal.get_obj_from_database_by_id("users", obj_id)
             if user:
                 user = dict(user)
-                roles = await dal.get_all(
-                    "roles",
+                role_ids = await dal.get_all(
+                    "user_roles",
+                    [lambda tablename: f"{tablename}.user_id = '{user["id"]}'"],
                 )
-                user["roles"] = [
-                    role for role in roles if role["id"] in user["role_ids"]
-                ]
+                roles = []
+                if role_ids:
+                    roles = await dal.get_all(
+                        "roles",
+                        [
+                            lambda tablename: f"{tablename}.id IN ({",".join(f"'{dict(rid)["role_id"]}'" for rid in role_ids)})"
+                        ],
+                    )
+                user["roles"] = roles
             return user
 
     return get_user_from_database_by_id
+
+
+@pytest.fixture
+async def get_user_id_by_username_from_database() -> Callable[[str], UUID | None]:
+    async def get_user_id_by_username(username: str) -> UUID | None:
+        async with TestDAL(DSN_FOR_TESTDAL) as dal:
+            user_id = await dal.get_all(
+                "users",
+                [lambda tablename: f"{tablename}.username = '{username}'"],
+            )
+            return user_id[0]["id"]
+
+    return get_user_id_by_username
 
 
 @pytest.fixture
@@ -155,9 +191,17 @@ async def create_role_in_database() -> Callable[[dict[str | list[dict[str]]]], s
 async def create_user_in_database() -> Callable[[dict[str | list[dict[str]]]], str]:
     async def create_user_in_database(user_info: dict) -> str:
         async with TestDAL(DSN_FOR_TESTDAL) as dal:
+            role_ids = user_info.pop("role_ids", None)
             user_id = await dal.create_object_in_database("users", user_info)
             full_name = f"{user_info.get('first_name', '')} {user_info.get('last_name', '')} {user_info.get('patronymic', '')}"
             await dal.add_tsvector_to_obj("users", user_id, "full_name_tsv", full_name)
+            if role_ids:
+                for role_id in role_ids:
+                    await dal.create_object_in_database(
+                        "user_roles",
+                        {"role_id": role_id, "user_id": user_id},
+                        "user_id",
+                    )
             return user_id
 
     return create_user_in_database
@@ -176,9 +220,9 @@ async def create_device_in_database() -> Callable[[dict[str | list[dict[str]]]],
 async def create_department_in_database() -> (
     Callable[[dict[str | list[dict[str]]]], str]
 ):
-    async def create_device_in_database(departmnet_info) -> str:
+    async def create_device_in_database(department_info) -> str:
         async with TestDAL(DSN_FOR_TESTDAL) as dal:
-            return await dal.create_object_in_database("departments", departmnet_info)
+            return await dal.create_object_in_database("departments", department_info)
 
     return create_device_in_database
 

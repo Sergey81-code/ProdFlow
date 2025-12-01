@@ -33,7 +33,7 @@ class AuthService:
             data={
                 "sub": user.username,
                 "user_id": str(user.id),
-                "roles": [str(role_id) for role_id in user.role_ids],
+                "roles": [str(role.id) for role in user.roles],
                 "permissions": permissions,
             },
             token_type="access",

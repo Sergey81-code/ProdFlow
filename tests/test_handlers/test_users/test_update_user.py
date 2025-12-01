@@ -7,9 +7,13 @@ from tests.conftest import USER_URL, VERSION_URL
 from tests.utils_for_tests import create_auth_headers_for_user
 
 
-async def test_update_user(client, create_user_in_database, create_role_in_database, get_user_from_database):
+async def test_update_user(
+    client, create_user_in_database, create_role_in_database, get_user_from_database
+):
     role_id = uuid4()
-    await create_role_in_database({"id": role_id, "name": "employee", "permissions": []})
+    await create_role_in_database(
+        {"id": role_id, "name": "employee", "permissions": []}
+    )
 
     user_id = await create_user_in_database(
         {
@@ -18,7 +22,7 @@ async def test_update_user(client, create_user_in_database, create_role_in_datab
             "first_name": "John",
             "last_name": "Doe",
             "patronymic": "M",
-            "finger_token": "token123",
+            "employee_number": "token123",
             "password": "Pass123!",
             "role_ids": [str(role_id)],
         }
@@ -29,7 +33,7 @@ async def test_update_user(client, create_user_in_database, create_role_in_datab
         "first_name": "Johnny",
         "last_name": "Doeman",
         "patronymic": "Martin",
-        "finger_token": "new_token321",
+        "employee_number": "new_token321",
         "password": "Pass12312!!",
         "role_ids": [str(role_id)],
     }
@@ -48,22 +52,26 @@ async def test_update_user(client, create_user_in_database, create_role_in_datab
     assert data["first_name"] == body["first_name"]
     assert data["last_name"] == body["last_name"]
     assert data["patronymic"] == body["patronymic"]
-    assert data["finger_token"] == body["finger_token"]
-    assert [str(role) for role in data["role_ids"]] == body["role_ids"]
+    assert data["employee_number"] == body["employee_number"]
+    assert set([str(role["id"]) for role in data["roles"]]) == set(body["role_ids"])
 
     user_db = await get_user_from_database(user_id)
     assert user_db["username"] == body["username"]
     assert user_db["first_name"] == body["first_name"]
     assert user_db["last_name"] == body["last_name"]
     assert user_db["patronymic"] == body["patronymic"]
-    assert [str(role) for role in user_db["role_ids"]] == body["role_ids"]
+    assert set([str(role["id"]) for role in user_db["roles"]]) == set(body["role_ids"])
 
 
-async def test_update_user_role_change_success(client, create_user_in_database, create_role_in_database, get_user_from_database):
+async def test_update_user_role_change_success(
+    client, create_user_in_database, create_role_in_database, get_user_from_database
+):
     rid_old = uuid4()
     rid_new = uuid4()
 
-    await create_role_in_database({"id": rid_old, "name": "employee", "permissions": []})
+    await create_role_in_database(
+        {"id": rid_old, "name": "employee", "permissions": []}
+    )
     await create_role_in_database({"id": rid_new, "name": "manager", "permissions": []})
 
     user_id = await create_user_in_database(
@@ -73,7 +81,7 @@ async def test_update_user_role_change_success(client, create_user_in_database, 
             "first_name": "F",
             "last_name": "L",
             "patronymic": "P",
-            "finger_token": "T",
+            "employee_number": "T",
             "password": "Pass123!",
             "role_ids": [str(rid_old)],
         }
@@ -82,14 +90,18 @@ async def test_update_user_role_change_success(client, create_user_in_database, 
     body = {"role_ids": [str(rid_new)]}
     headers = await create_auth_headers_for_user([Permissions.UPDATE_USER])
 
-    resp = client.patch(f"{VERSION_URL}{USER_URL}/{user_id}", json=body, headers=headers)
+    resp = client.patch(
+        f"{VERSION_URL}{USER_URL}/{user_id}", json=body, headers=headers
+    )
     assert resp.status_code == 200
 
     user_db = await get_user_from_database(user_id)
-    assert set(user_db["role_ids"]) == {rid_new}
+    assert set(role["id"] for role in user_db["roles"]) == {rid_new}
 
 
-async def test_update_user_forbidden_for_super(client, create_user_in_database, create_role_in_database, get_project_settings):
+async def test_update_user_forbidden_for_super(
+    client, create_user_in_database, create_role_in_database, get_project_settings
+):
     settings = await get_project_settings()
 
     super_role_id = uuid4()
@@ -108,7 +120,7 @@ async def test_update_user_forbidden_for_super(client, create_user_in_database, 
             "first_name": "A",
             "last_name": "B",
             "patronymic": "-",
-            "finger_token": "x",
+            "employee_number": "x",
             "password": "Pass123!",
             "role_ids": [str(super_role_id)],
         }
@@ -123,10 +135,14 @@ async def test_update_user_forbidden_for_super(client, create_user_in_database, 
     )
 
     assert resp.status_code == 403
-    assert resp.json() == {"detail": "User with super role is not allowed to perform this action"}
+    assert resp.json() == {
+        "detail": "User with super role is not allowed to perform this action"
+    }
 
 
-async def test_update_user_unauthenticated(client, create_user_in_database, get_project_settings):
+async def test_update_user_unauthenticated(
+    client, create_user_in_database, get_project_settings
+):
     user_id = await create_user_in_database(
         {
             "id": uuid4(),
@@ -134,7 +150,7 @@ async def test_update_user_unauthenticated(client, create_user_in_database, get_
             "first_name": "F",
             "last_name": "L",
             "patronymic": "P",
-            "finger_token": "T",
+            "employee_number": "T",
             "password": "Pass123!",
             "role_ids": [],
         }
@@ -152,7 +168,9 @@ async def test_update_user_unauthenticated(client, create_user_in_database, get_
         assert resp.status_code == 200
 
 
-async def test_update_user_no_permissions(client, create_user_in_database, get_project_settings):
+async def test_update_user_no_permissions(
+    client, create_user_in_database, get_project_settings
+):
     user_id = await create_user_in_database(
         {
             "id": uuid4(),
@@ -160,7 +178,7 @@ async def test_update_user_no_permissions(client, create_user_in_database, get_p
             "first_name": "F",
             "last_name": "L",
             "patronymic": "P",
-            "finger_token": "T",
+            "employee_number": "T",
             "password": "Pass123!",
             "role_ids": [],
         }
@@ -196,6 +214,55 @@ async def test_update_user_invalid_id(client, bad_id, expected):
     assert resp.status_code == expected
 
 
+async def test_update_user_only_empty_role_ids(
+    client, create_role_in_database, create_user_in_database, get_user_from_database
+):
+    role_id = uuid4()
+    await create_role_in_database(
+        {
+            "id": role_id,
+            "name": "employee",
+            "permissions": [Permissions.CREATE_DEPARTMENT],
+        }
+    )
+    user_info = {
+        "id": uuid4(),
+        "username": "john",
+        "first_name": "John",
+        "last_name": "Doe",
+        "patronymic": "M",
+        "employee_number": "token123",
+        "password": "Pass123!",
+        "role_ids": [str(role_id)],
+    }
+    user_id = await create_user_in_database(user_info.copy())
+
+    headers = await create_auth_headers_for_user([Permissions.UPDATE_USER])
+
+    resp = client.patch(
+        f"{VERSION_URL}{USER_URL}/{user_id}",
+        json={"role_ids": []},
+        headers=headers,
+    )
+
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["username"] == user_info["username"]
+    assert data["first_name"] == user_info["first_name"]
+    assert data["last_name"] == user_info["last_name"]
+    assert data["patronymic"] == user_info["patronymic"]
+    assert data["employee_number"] == user_info["employee_number"]
+    assert data["roles"] == []
+
+    user_db = await get_user_from_database(user_id)
+    assert user_db["username"] == user_info["username"]
+    assert user_db["first_name"] == user_info["first_name"]
+    assert user_db["last_name"] == user_info["last_name"]
+    assert user_db["patronymic"] == user_info["patronymic"]
+    assert user_db["employee_number"] == user_info["employee_number"]
+    assert user_db["roles"] == []
+
+
 async def test_update_user_empty_body(client, create_user_in_database):
     user_id = await create_user_in_database(
         {
@@ -204,9 +271,8 @@ async def test_update_user_empty_body(client, create_user_in_database):
             "first_name": "F",
             "last_name": "L",
             "patronymic": "P",
-            "finger_token": "T",
+            "employee_number": "T",
             "password": "Pass123!",
-            "role_ids": [],
         }
     )
 
@@ -230,7 +296,7 @@ async def test_update_user_invalid_role_ids_type(client, create_user_in_database
             "first_name": "F",
             "last_name": "L",
             "patronymic": "P",
-            "finger_token": "T",
+            "employee_number": "T",
             "password": "Pass123!",
             "role_ids": [],
         }
@@ -255,7 +321,7 @@ async def test_update_user_sql_injection(client, create_user_in_database):
             "first_name": "F",
             "last_name": "L",
             "patronymic": "P",
-            "finger_token": "T",
+            "employee_number": "T",
             "password": "Pass123!",
             "role_ids": [],
         }
@@ -286,7 +352,7 @@ async def test_update_user_sql_injection(client, create_user_in_database):
         ({"last_name": " "}, 422, "Field cannot be empty"),
         ({"last_name": "A" * 200}, 422, "Field length must be <= 99 characters"),
         ({"patronymic": "A" * 200}, 422, "Field length must be <= 99 characters"),
-        ({"finger_token": "x" * 100}, 422, "Field length must be <= 64 characters"),
+        ({"employee_number": "x" * 100}, 422, "Field length must be <= 64 characters"),
         ({"password": "short"}, 422, "Password"),
         ({"password": "a" * 200}, 422, "Field length must be <= 99 characters"),
         ({"role_ids": "not-a-list"}, 422, "Input should be a valid list"),
@@ -317,7 +383,7 @@ async def test_update_user_all_validation_errors(
             "first_name": "John",
             "last_name": "Doe",
             "patronymic": "Michael",
-            "finger_token": "abc123",
+            "employee_number": "abc123",
             "password": "ValidPass123!",
             "role_ids": [],
         }

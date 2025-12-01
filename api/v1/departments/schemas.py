@@ -1,5 +1,9 @@
 from uuid import UUID
+from typing import TYPE_CHECKING
 from pydantic import BaseModel, ConfigDict, Field
+
+
+from api.v1.users.schemas import User
 
 
 class TundeModel(BaseModel):
@@ -11,11 +15,15 @@ class Department(TundeModel):
     name: str
     code: str
 
+    users: list[User] | None = None
+
 
 class ShowDepartment(TundeModel):
     id: UUID
     name: str
     code: str
+
+    users: list[User] | None = None
 
 
 class CreateDepartment(BaseModel):

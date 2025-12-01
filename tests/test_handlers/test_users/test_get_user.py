@@ -13,7 +13,9 @@ from utils.jwt import JWT
 
 
 async def test_get_user(client, create_user_in_database, create_role_in_database):
-    role_ids = [str(role["id"]) for role in await _create_roles(create_role_in_database)]
+    role_ids = [
+        str(role["id"]) for role in await _create_roles(create_role_in_database)
+    ]
     user_id = uuid4()
     user_info = {
         "id": user_id,
@@ -21,11 +23,11 @@ async def test_get_user(client, create_user_in_database, create_role_in_database
         "first_name": "John",
         "last_name": "Doe",
         "patronymic": "Martin",
-        "finger_token": "some_token123",
+        "employee_number": "some_token123",
         "role_ids": role_ids,
     }
 
-    await create_user_in_database(user_info)
+    await create_user_in_database(user_info.copy())
     headers = await create_auth_headers_for_user([Permissions.GET_USERS])
 
     resp = client.get(f"{VERSION_URL}{USER_URL}/{str(user_id)}", headers=headers)
@@ -37,15 +39,17 @@ async def test_get_user(client, create_user_in_database, create_role_in_database
     assert data["first_name"] == user_info["first_name"]
     assert data["last_name"] == user_info["last_name"]
     assert data["patronymic"] == user_info["patronymic"]
-    assert data["finger_token"] == user_info["finger_token"]
-    assert data["role_ids"] == user_info["role_ids"]
+    assert data["employee_number"] == user_info["employee_number"]
+    assert set(user_info["role_ids"]) == set([role["id"] for role in data["roles"]])
 
 
 async def test_get_user_not_found(client):
     non_existing_id = uuid4()
     headers = await create_auth_headers_for_user([Permissions.GET_USERS])
 
-    resp = client.get(f"{VERSION_URL}{USER_URL}/{str(non_existing_id)}", headers=headers)
+    resp = client.get(
+        f"{VERSION_URL}{USER_URL}/{str(non_existing_id)}", headers=headers
+    )
 
     assert resp.status_code == 404
     assert resp.json() == {"detail": "User with this id not found"}
@@ -63,9 +67,13 @@ async def test_get_user_invalid_uuid(client, bad_id):
     assert resp.status_code == 422
 
 
-async def test_get_user_unauthorized(client, create_user_in_database, get_project_settings):
+async def test_get_user_unauthorized(
+    client, create_user_in_database, get_project_settings
+):
     user_id = uuid4()
-    await create_user_in_database({"id": user_id, "username": "john", "first_name": "John", "last_name": "Doe"})
+    await create_user_in_database(
+        {"id": user_id, "username": "john", "first_name": "John", "last_name": "Doe"}
+    )
 
     resp = client.get(f"{VERSION_URL}{USER_URL}/{user_id}")
 
@@ -77,9 +85,13 @@ async def test_get_user_unauthorized(client, create_user_in_database, get_projec
         assert resp.status_code == 200
 
 
-async def test_get_user_bad_token(client, create_user_in_database, get_project_settings):
+async def test_get_user_bad_token(
+    client, create_user_in_database, get_project_settings
+):
     user_id = uuid4()
-    await create_user_in_database({"id": user_id, "username": "john", "first_name": "John", "last_name": "Doe"})
+    await create_user_in_database(
+        {"id": user_id, "username": "john", "first_name": "John", "last_name": "Doe"}
+    )
 
     headers = await create_auth_headers_for_user([Permissions.CREATE_USER])
     bad = {k: v + "broken" for k, v in headers.items()}
@@ -94,9 +106,13 @@ async def test_get_user_bad_token(client, create_user_in_database, get_project_s
         assert resp.status_code == 200
 
 
-async def test_get_user_forbidden_no_permissions(client, create_user_in_database, get_project_settings):
+async def test_get_user_forbidden_no_permissions(
+    client, create_user_in_database, get_project_settings
+):
     user_id = uuid4()
-    await create_user_in_database({"id": user_id, "username": "john", "first_name": "John", "last_name": "Doe"})
+    await create_user_in_database(
+        {"id": user_id, "username": "john", "first_name": "John", "last_name": "Doe"}
+    )
 
     headers = await create_auth_headers_for_user([Permissions.GET_ROLES])
 
@@ -111,7 +127,9 @@ async def test_get_user_forbidden_no_permissions(client, create_user_in_database
 
 
 async def test_get_all_users(client, create_role_in_database, create_user_in_database):
-    role_ids = [str(role["id"]) for role in await _create_roles(create_role_in_database)]
+    role_ids = [
+        str(role["id"]) for role in await _create_roles(create_role_in_database)
+    ]
     users = await _create_users(create_user_in_database, role_ids)
 
     headers = await create_auth_headers_for_user([Permissions.GET_USERS])
@@ -123,8 +141,12 @@ async def test_get_all_users(client, create_role_in_database, create_user_in_dat
     assert len(data) == len(users)
 
 
-async def test_get_users_by_name_exact_match(client, create_role_in_database, create_user_in_database):
-    role_ids = [str(role["id"]) for role in await _create_roles(create_role_in_database)]
+async def test_get_users_by_name_exact_match(
+    client, create_role_in_database, create_user_in_database
+):
+    role_ids = [
+        str(role["id"]) for role in await _create_roles(create_role_in_database)
+    ]
     await _create_users(create_user_in_database, role_ids)
 
     headers = await create_auth_headers_for_user([Permissions.GET_USERS])
@@ -137,8 +159,12 @@ async def test_get_users_by_name_exact_match(client, create_role_in_database, cr
     assert data[0]["username"] == "johndoe1"
 
 
-async def test_get_users_by_name_case_insensitive(client, create_role_in_database, create_user_in_database):
-    role_ids = [str(role["id"]) for role in await _create_roles(create_role_in_database)]
+async def test_get_users_by_name_case_insensitive(
+    client, create_role_in_database, create_user_in_database
+):
+    role_ids = [
+        str(role["id"]) for role in await _create_roles(create_role_in_database)
+    ]
     await _create_users(create_user_in_database, role_ids)
     headers = await create_auth_headers_for_user([Permissions.GET_USERS])
 
@@ -149,8 +175,12 @@ async def test_get_users_by_name_case_insensitive(client, create_role_in_databas
     assert len(data) == 1
 
 
-async def test_get_users_by_name_partial_match(client, create_role_in_database, create_user_in_database):
-    role_ids = [str(role["id"]) for role in await _create_roles(create_role_in_database)]
+async def test_get_users_by_name_partial_match(
+    client, create_role_in_database, create_user_in_database
+):
+    role_ids = [
+        str(role["id"]) for role in await _create_roles(create_role_in_database)
+    ]
     await _create_users(create_user_in_database, role_ids)
     headers = await create_auth_headers_for_user([Permissions.GET_USERS])
 
@@ -161,8 +191,12 @@ async def test_get_users_by_name_partial_match(client, create_role_in_database, 
     assert len(data) >= 1
 
 
-async def test_get_users_by_name_no_results(client, create_role_in_database, create_user_in_database):
-    role_ids = [str(role["id"]) for role in await _create_roles(create_role_in_database)]
+async def test_get_users_by_name_no_results(
+    client, create_role_in_database, create_user_in_database
+):
+    role_ids = [
+        str(role["id"]) for role in await _create_roles(create_role_in_database)
+    ]
     await _create_users(create_user_in_database, role_ids)
     headers = await create_auth_headers_for_user([Permissions.GET_USERS])
 
@@ -172,8 +206,12 @@ async def test_get_users_by_name_no_results(client, create_role_in_database, cre
     assert resp.json() == []
 
 
-async def test_get_users_unauthorized_no_token(client, create_role_in_database, create_user_in_database, get_project_settings):
-    role_ids = [str(role["id"]) for role in await _create_roles(create_role_in_database)]
+async def test_get_users_unauthorized_no_token(
+    client, create_role_in_database, create_user_in_database, get_project_settings
+):
+    role_ids = [
+        str(role["id"]) for role in await _create_roles(create_role_in_database)
+    ]
     await _create_users(create_user_in_database, role_ids)
     resp = client.get(f"{VERSION_URL}{USER_URL}/")
 
@@ -185,8 +223,12 @@ async def test_get_users_unauthorized_no_token(client, create_role_in_database, 
         assert resp.status_code == 200
 
 
-async def test_get_users_bad_token(client, create_role_in_database, create_user_in_database, get_project_settings):
-    role_ids = [str(role["id"]) for role in await _create_roles(create_role_in_database)]
+async def test_get_users_bad_token(
+    client, create_role_in_database, create_user_in_database, get_project_settings
+):
+    role_ids = [
+        str(role["id"]) for role in await _create_roles(create_role_in_database)
+    ]
     await _create_users(create_user_in_database, role_ids)
 
     headers = await create_auth_headers_for_user([Permissions.GET_USERS])
@@ -202,8 +244,12 @@ async def test_get_users_bad_token(client, create_role_in_database, create_user_
         assert resp.status_code == 200
 
 
-async def test_get_users_forbidden(client, create_role_in_database, create_user_in_database, get_project_settings):
-    role_ids = [str(role["id"]) for role in await _create_roles(create_role_in_database)]
+async def test_get_users_forbidden(
+    client, create_role_in_database, create_user_in_database, get_project_settings
+):
+    role_ids = [
+        str(role["id"]) for role in await _create_roles(create_role_in_database)
+    ]
     await _create_users(create_user_in_database, role_ids)
     headers = await create_auth_headers_for_user([Permissions.GET_ROLES])
 
@@ -217,8 +263,12 @@ async def test_get_users_forbidden(client, create_role_in_database, create_user_
         assert resp.status_code == 200
 
 
-async def test_get_users_by_first_name(client, create_role_in_database, create_user_in_database):
-    role_ids = [str(role["id"]) for role in await _create_roles(create_role_in_database)]
+async def test_get_users_by_first_name(
+    client, create_role_in_database, create_user_in_database
+):
+    role_ids = [
+        str(role["id"]) for role in await _create_roles(create_role_in_database)
+    ]
     await _create_users(create_user_in_database, role_ids)
     headers = await create_auth_headers_for_user([Permissions.GET_USERS])
 
@@ -228,8 +278,12 @@ async def test_get_users_by_first_name(client, create_role_in_database, create_u
     assert all("first" in u["first_name"].lower() for u in data)
 
 
-async def test_get_users_by_last_name(client, create_role_in_database, create_user_in_database):
-    role_ids = [str(role["id"]) for role in await _create_roles(create_role_in_database)]
+async def test_get_users_by_last_name(
+    client, create_role_in_database, create_user_in_database
+):
+    role_ids = [
+        str(role["id"]) for role in await _create_roles(create_role_in_database)
+    ]
     await _create_users(create_user_in_database, role_ids)
     headers = await create_auth_headers_for_user([Permissions.GET_USERS])
 
@@ -239,8 +293,12 @@ async def test_get_users_by_last_name(client, create_role_in_database, create_us
     assert all("last" in u["last_name"].lower() for u in data)
 
 
-async def test_get_users_by_patronymic(client, create_role_in_database, create_user_in_database):
-    role_ids = [str(role["id"]) for role in await _create_roles(create_role_in_database)]
+async def test_get_users_by_patronymic(
+    client, create_role_in_database, create_user_in_database
+):
+    role_ids = [
+        str(role["id"]) for role in await _create_roles(create_role_in_database)
+    ]
     await _create_users(create_user_in_database, role_ids)
     headers = await create_auth_headers_for_user([Permissions.GET_USERS])
 
@@ -293,7 +351,9 @@ async def test_fulltext_search_parametrized(
     query,
     expected,
 ):
-    role_ids = [str(role["id"]) for role in await _create_roles(create_role_in_database)]
+    role_ids = [
+        str(role["id"]) for role in await _create_roles(create_role_in_database)
+    ]
     users = await _create_users(create_user_in_database, role_ids)
 
     headers = await create_auth_headers_for_user([Permissions.GET_USERS])
@@ -304,7 +364,9 @@ async def test_fulltext_search_parametrized(
     expected_ids = {str(users[i]["id"]) for i in expected}
     returned_ids = {u["id"] for u in data}
 
-    assert returned_ids == expected_ids, f"\nQuery: {query!r}\nExpected count: {len(expected_ids)} -> {expected_ids}\nGot: {len(returned_ids)} -> {returned_ids}\nReturned data: {data}"
+    assert (
+        returned_ids == expected_ids
+    ), f"\nQuery: {query!r}\nExpected count: {len(expected_ids)} -> {expected_ids}\nGot: {len(returned_ids)} -> {returned_ids}\nReturned data: {data}"
 
 
 async def test_get_me_success(client, create_user_in_database):
@@ -314,11 +376,11 @@ async def test_get_me_success(client, create_user_in_database):
         "first_name": "John",
         "last_name": "Doe",
         "patronymic": "Martin",
-        "finger_token": "finger123",
+        "employee_number": "finger123",
         "role_ids": [],
     }
 
-    await create_user_in_database(user_info)
+    await create_user_in_database(user_info.copy())
 
     headers = await create_auth_headers_for_user(
         permissions=[],
@@ -335,8 +397,8 @@ async def test_get_me_success(client, create_user_in_database):
     assert data["first_name"] == user_info["first_name"]
     assert data["last_name"] == user_info["last_name"]
     assert data["patronymic"] == user_info["patronymic"]
-    assert data["finger_token"] == user_info["finger_token"]
-    assert data["role_ids"] == user_info["role_ids"]
+    assert data["employee_number"] == user_info["employee_number"]
+    assert set([role["id"] for role in data["roles"]]) == set(user_info["role_ids"])
 
 
 async def test_get_me_unauthorized_no_token(client):
@@ -394,13 +456,15 @@ async def test_get_me_without_permissions(client, create_user_in_database):
         "first_name": "No",
         "last_name": "Rights",
         "patronymic": "Test",
-        "finger_token": "no_perm",
+        "employee_number": "no_perm",
         "role_ids": [],
     }
 
     await create_user_in_database(user_info)
 
-    headers = await create_auth_headers_for_user(permissions=[], username=user_info["username"])
+    headers = await create_auth_headers_for_user(
+        permissions=[], username=user_info["username"]
+    )
 
     resp = client.get(f"{VERSION_URL}{USER_URL}/me", headers=headers)
 
@@ -417,7 +481,7 @@ async def test_get_me_case_sensitive_username(client, create_user_in_database):
         "last_name": "Doe",
     }
 
-    await create_user_in_database(user_info)
+    await create_user_in_database(user_info.copy())
 
     headers = await create_auth_headers_for_user(permissions=[], username="johndoe")
 

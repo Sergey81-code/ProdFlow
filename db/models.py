@@ -17,7 +17,7 @@ uuid_pk = Annotated[
 
 
 class Department(Base):
-    __tablename__ = "departmnets"
+    __tablename__ = "departments"
 
     id: Mapped[uuid_pk]
     name: Mapped[str] = mapped_column(String(128), unique=True, nullable=False)
@@ -36,7 +36,10 @@ class Role(Base):
     permissions: Mapped[list[str]] = mapped_column(ARRAY(String), default=list)
 
     users: Mapped[list["User"]] = relationship(
-        secondary="user_roles", back_populates="roles", lazy="selectin"
+        secondary="user_roles",
+        back_populates="roles",
+        lazy="selectin",
+        passive_deletes=True,
     )
 
 
@@ -52,7 +55,7 @@ class User(Base):
     employee_number: Mapped[str] = mapped_column(String(100), nullable=True)
     department_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey("departmnets.id", ondelete="SET NULL"),
+        ForeignKey("departments.id", ondelete="SET NULL"),
         nullable=True,
     )
 
@@ -61,7 +64,10 @@ class User(Base):
     )
 
     roles: Mapped[list["Role"]] = relationship(
-        secondary="user_roles", back_populates="users", lazy="joined"
+        secondary="user_roles",
+        back_populates="users",
+        lazy="joined",
+        passive_deletes=True,
     )
 
     full_name_tsv: Mapped[str] = mapped_column(TSVECTOR, nullable=True)
@@ -74,8 +80,13 @@ class User(Base):
 class UserRole(Base):
     __tablename__ = "user_roles"
 
-    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"), primary_key=True)
-    role_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("roles.id"), primary_key=True)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+
+    role_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("roles.id", ondelete="CASCADE"), primary_key=True
+    )
 
 
 class Device(Base):

@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.v1.roles.repo_interface import IRoleRepository
 from api.v1.roles.schemas import CreateRole, Role, UpdateRole
-from db.models import Role as RoleDb
+from db.models import Role as RoleDb, UserRole
 
 
 class PostgresRoleRepo(IRoleRepository):
@@ -38,6 +38,8 @@ class PostgresRoleRepo(IRoleRepository):
         return Role.model_validate(updated_role)
 
     async def delete(self, id: UUID) -> UUID:
+        stmt_roles = delete(UserRole).where(UserRole.role_id == id)
+        await self._session.execute(stmt_roles)
         stmt = delete(RoleDb).where(RoleDb.id == id).returning(RoleDb.id)
         result = await self._session.execute(stmt)
         await self._session.commit()

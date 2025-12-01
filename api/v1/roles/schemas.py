@@ -1,6 +1,9 @@
 from uuid import UUID
+from typing import TYPE_CHECKING
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+from api.v1.users.schemas import User
 
 
 class TundeModel(BaseModel):
@@ -12,11 +15,15 @@ class Role(TundeModel):
     name: str
     permissions: list[str] = []
 
+    users: list[User] | None = None
+
 
 class ShowRole(TundeModel):
     id: UUID
     name: str
     permissions: list[str] = []
+
+    users: list[User] | None = None
 
 
 class CreateRole(BaseModel):

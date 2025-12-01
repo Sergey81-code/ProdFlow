@@ -7,9 +7,13 @@ from tests.conftest import USER_URL, VERSION_URL
 from tests.utils_for_tests import create_auth_headers_for_user
 
 
-async def test_delete_user(client, create_role_in_database, create_user_in_database, get_user_from_database):
+async def test_delete_user(
+    client, create_role_in_database, create_user_in_database, get_user_from_database
+):
     role_id = uuid4()
-    await create_role_in_database({"id": role_id, "name": "employee", "permissions": []})
+    await create_role_in_database(
+        {"id": role_id, "name": "employee", "permissions": []}
+    )
 
     user_data = {
         "id": uuid4(),
@@ -17,7 +21,7 @@ async def test_delete_user(client, create_role_in_database, create_user_in_datab
         "first_name": "John",
         "last_name": "Doe",
         "patronymic": "Martin",
-        "finger_token": "some_token123",
+        "employee_number": "some_token123",
         "password": "StrongPass123!",
         "role_ids": [str(role_id)],
     }
@@ -63,7 +67,9 @@ async def test_delete_user_not_found(client):
                         "loc": ["path", "user_id"],
                         "msg": "Input should be a valid UUID, invalid length: expected length 32 for simple format, found 3",
                         "input": "123",
-                        "ctx": {"error": "invalid length: expected length 32 for simple format, found 3"},
+                        "ctx": {
+                            "error": "invalid length: expected length 32 for simple format, found 3"
+                        },
                     }
                 ]
             },
@@ -77,7 +83,9 @@ async def test_delete_user_not_found(client):
                         "loc": ["path", "user_id"],
                         "msg": "Input should be a valid UUID, invalid character: expected an optional prefix of `urn:uuid:` followed by [0-9a-fA-F-], found `n` at 1",
                         "input": "not-a-uuid",
-                        "ctx": {"error": "invalid character: expected an optional prefix of `urn:uuid:` followed by [0-9a-fA-F-], found `n` at 1"},
+                        "ctx": {
+                            "error": "invalid character: expected an optional prefix of `urn:uuid:` followed by [0-9a-fA-F-], found `n` at 1"
+                        },
                     }
                 ]
             },
@@ -96,7 +104,9 @@ async def test_delete_user_invalid_id(client, bad_id, expected_detail):
     assert resp.json() == expected_detail
 
 
-async def test_delete_user_unauth(client, create_role_in_database, create_user_in_database, get_project_settings):
+async def test_delete_user_unauth(
+    client, create_role_in_database, create_user_in_database, get_project_settings
+):
     role_id = uuid4()
     await create_role_in_database({"id": role_id, "name": "x", "permissions": []})
 
@@ -107,7 +117,7 @@ async def test_delete_user_unauth(client, create_role_in_database, create_user_i
             "first_name": "Bad",
             "last_name": "Token",
             "patronymic": "Test",
-            "finger_token": "tok",
+            "employee_number": "tok",
             "password": "123",
             "role_ids": [str(role_id)],
         }
@@ -128,7 +138,9 @@ async def test_delete_user_unauth(client, create_role_in_database, create_user_i
         assert resp.status_code == 200
 
 
-async def test_delete_user_no_permissions(client, create_role_in_database, create_user_in_database, get_project_settings):
+async def test_delete_user_no_permissions(
+    client, create_role_in_database, create_user_in_database, get_project_settings
+):
     role_id = uuid4()
     await create_role_in_database({"id": role_id, "name": "x", "permissions": []})
 
@@ -139,7 +151,7 @@ async def test_delete_user_no_permissions(client, create_role_in_database, creat
             "first_name": "No",
             "last_name": "Perms",
             "patronymic": "Test",
-            "finger_token": "tok",
+            "employee_number": "tok",
             "password": "123",
             "role_ids": [str(role_id)],
         }
@@ -160,7 +172,9 @@ async def test_delete_user_no_permissions(client, create_role_in_database, creat
         assert resp.status_code == 200
 
 
-async def test_delete_user_bad_credentials(client, create_role_in_database, create_user_in_database, get_project_settings):
+async def test_delete_user_bad_credentials(
+    client, create_role_in_database, create_user_in_database, get_project_settings
+):
     role_id = uuid4()
     await create_role_in_database({"id": role_id, "name": "test", "permissions": []})
 
@@ -171,7 +185,7 @@ async def test_delete_user_bad_credentials(client, create_role_in_database, crea
             "first_name": "Bad",
             "last_name": "Cred",
             "patronymic": "Test",
-            "finger_token": "tok",
+            "employee_number": "tok",
             "password": "123",
             "role_ids": [str(role_id)],
         }
@@ -216,7 +230,7 @@ async def test_delete_super_user_not_allowed(
             "first_name": "Super",
             "last_name": "Admin",
             "patronymic": "Test",
-            "finger_token": "tok",
+            "employee_number": "tok",
             "password": "123",
             "role_ids": [str(role_id)],
         }
@@ -230,4 +244,6 @@ async def test_delete_super_user_not_allowed(
     )
 
     assert resp.status_code == 403
-    assert resp.json() == {"detail": "User with super role is not allowed to perform this action"}
+    assert resp.json() == {
+        "detail": "User with super role is not allowed to perform this action"
+    }
