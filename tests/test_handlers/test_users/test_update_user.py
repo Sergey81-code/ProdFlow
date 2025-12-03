@@ -8,11 +8,33 @@ from tests.utils_for_tests import create_auth_headers_for_user
 
 
 async def test_update_user(
-    client, create_user_in_database, create_role_in_database, get_user_from_database
+    client,
+    create_user_in_database,
+    create_role_in_database,
+    get_user_from_database,
+    create_department_in_database,
 ):
     role_id = uuid4()
     await create_role_in_database(
         {"id": role_id, "name": "employee", "permissions": []}
+    )
+
+    department_id = uuid4()
+    await create_department_in_database(
+        {
+            "id": department_id,
+            "name": "test department name",
+            "code": "some department code",
+        }
+    )
+
+    new_department_id = uuid4()
+    await create_department_in_database(
+        {
+            "id": new_department_id,
+            "name": "test department name1",
+            "code": "some department code1",
+        }
     )
 
     user_id = await create_user_in_database(
@@ -25,6 +47,7 @@ async def test_update_user(
             "employee_number": "token123",
             "password": "Pass123!",
             "role_ids": [str(role_id)],
+            "department_id": str(department_id),
         }
     )
 
@@ -36,6 +59,7 @@ async def test_update_user(
         "employee_number": "new_token321",
         "password": "Pass12312!!",
         "role_ids": [str(role_id)],
+        "department_id": str(new_department_id),
     }
 
     headers = await create_auth_headers_for_user([Permissions.UPDATE_USER])
@@ -53,6 +77,7 @@ async def test_update_user(
     assert data["last_name"] == body["last_name"]
     assert data["patronymic"] == body["patronymic"]
     assert data["employee_number"] == body["employee_number"]
+    assert data["department_id"] == body["department_id"]
     assert set([str(role["id"]) for role in data["roles"]]) == set(body["role_ids"])
 
     user_db = await get_user_from_database(user_id)
@@ -60,6 +85,7 @@ async def test_update_user(
     assert user_db["first_name"] == body["first_name"]
     assert user_db["last_name"] == body["last_name"]
     assert user_db["patronymic"] == body["patronymic"]
+    assert str(user_db["department_id"]) == body["department_id"]
     assert set([str(role["id"]) for role in user_db["roles"]]) == set(body["role_ids"])
 
 
@@ -196,6 +222,39 @@ async def test_update_user_no_permissions(
     if settings.ENABLE_PERMISSION_CHECK:
         assert resp.status_code == 403
         assert resp.json() == {"detail": "Forbidden: insufficient permissions"}
+    else:
+        assert resp.status_code == 200
+
+
+async def test_update_user_bad_token(
+    client, create_user_in_database, get_project_settings
+):
+    user_id = await create_user_in_database(
+        {
+            "id": uuid4(),
+            "username": "u",
+            "first_name": "F",
+            "last_name": "L",
+            "patronymic": "P",
+            "employee_number": "T",
+            "password": "Pass123!",
+            "role_ids": [],
+        }
+    )
+
+    headers = await create_auth_headers_for_user([Permissions.UPDATE_USER])
+    bad = {k: v + "broken" for k, v in headers.items()}
+
+    resp = client.patch(
+        f"{VERSION_URL}{USER_URL}/{user_id}",
+        json={"first_name": "New"},
+        headers=bad,
+    )
+
+    settings = await get_project_settings()
+    if settings.ENABLE_PERMISSION_CHECK:
+        assert resp.status_code == 401
+        assert resp.json() == {"detail": "Could not validate credentials"}
     else:
         assert resp.status_code == 200
 
@@ -399,3 +458,256 @@ async def test_update_user_all_validation_errors(
 
     assert resp.status_code == expected_status, resp.text
     assert expected_error_fragment in str(resp.json()), resp.json()
+
+
+async def test_update_user_invalid_department(
+    client,
+    create_user_in_database,
+    create_role_in_database,
+):
+    role_id = uuid4()
+    await create_role_in_database(
+        {"id": role_id, "name": "employee", "permissions": []}
+    )
+
+    user_id = await create_user_in_database(
+        {
+            "id": uuid4(),
+            "username": "john",
+            "first_name": "John",
+            "last_name": "Doe",
+            "patronymic": "M",
+            "employee_number": "token123",
+            "password": "Pass123!",
+            "role_ids": [str(role_id)],
+            "department_id": None,
+        }
+    )
+
+    headers = await create_auth_headers_for_user([Permissions.UPDATE_USER])
+
+    resp = client.patch(
+        f"{VERSION_URL}{USER_URL}/{user_id}",
+        json={"department_id": "non-existent-id"},
+        headers=headers,
+    )
+
+    assert resp.status_code == 422 or resp.status_code == 404
+    assert "department" in str(resp.json()).lower()
+
+
+async def test_update_user_remove_department(
+    client,
+    create_user_in_database,
+    create_role_in_database,
+    create_department_in_database,
+    get_user_from_database,
+):
+    role_id = uuid4()
+    await create_role_in_database(
+        {"id": role_id, "name": "employee", "permissions": []}
+    )
+
+    department_id = uuid4()
+    await create_department_in_database(
+        {
+            "id": department_id,
+            "name": "dep",
+            "code": "d1",
+        }
+    )
+
+    user_id = await create_user_in_database(
+        {
+            "id": uuid4(),
+            "username": "john",
+            "first_name": "John",
+            "last_name": "Doe",
+            "patronymic": "M",
+            "employee_number": "token123",
+            "password": "Pass123!",
+            "role_ids": [str(role_id)],
+            "department_id": str(department_id),
+        }
+    )
+
+    headers = await create_auth_headers_for_user([Permissions.UPDATE_USER])
+
+    resp = client.patch(
+        f"{VERSION_URL}{USER_URL}/{user_id}",
+        json={"department_id": None},
+        headers=headers,
+    )
+
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["department_id"] is None
+
+    user_db = await get_user_from_database(user_id)
+    assert user_db["department_id"] is None
+
+
+async def test_update_user_department_not_changed_on_empty_body(
+    client,
+    create_user_in_database,
+    create_role_in_database,
+    create_department_in_database,
+    get_user_from_database,
+):
+    role_id = uuid4()
+    await create_role_in_database(
+        {"id": role_id, "name": "employee", "permissions": []}
+    )
+
+    department_id = uuid4()
+    await create_department_in_database(
+        {
+            "id": department_id,
+            "name": "dep",
+            "code": "d1",
+        }
+    )
+
+    user_id = await create_user_in_database(
+        {
+            "id": uuid4(),
+            "username": "john",
+            "first_name": "John",
+            "last_name": "Doe",
+            "patronymic": "M",
+            "employee_number": "token123",
+            "password": "Pass123!",
+            "role_ids": [str(role_id)],
+            "department_id": str(department_id),
+        }
+    )
+
+    headers = await create_auth_headers_for_user([Permissions.UPDATE_USER])
+
+    resp = client.patch(
+        f"{VERSION_URL}{USER_URL}/{user_id}",
+        json={},
+        headers=headers,
+    )
+
+    assert resp.status_code == 422
+
+    user_db = await get_user_from_database(user_id)
+    assert str(user_db["department_id"]) == str(department_id)
+
+
+@pytest.mark.parametrize(
+    "department_id, expected_status",
+    [
+        (None, 200),
+        ("", 422),
+        ("   ", 422),
+        ("non-uuid-string", 422),
+    ],
+)
+async def test_update_user_department_validation(
+    client,
+    create_user_in_database,
+    create_role_in_database,
+    department_id,
+    expected_status,
+):
+    role_id = uuid4()
+    await create_role_in_database(
+        {"id": role_id, "name": "employee", "permissions": []}
+    )
+
+    user_id = await create_user_in_database(
+        {
+            "id": uuid4(),
+            "username": "john",
+            "first_name": "John",
+            "last_name": "Doe",
+            "patronymic": "M",
+            "employee_number": "token123",
+            "password": "Pass123!",
+            "role_ids": [str(role_id)],
+            "department_id": None,
+        }
+    )
+
+    headers = await create_auth_headers_for_user([Permissions.UPDATE_USER])
+
+    resp = client.patch(
+        f"{VERSION_URL}{USER_URL}/{user_id}",
+        json={"department_id": department_id},
+        headers=headers,
+    )
+
+    assert resp.status_code == expected_status
+
+
+@pytest.mark.parametrize(
+    "field, value, should_fail",
+    [
+        ("username", None, True),
+        ("first_name", None, True),
+        ("last_name", None, True),
+        ("patronymic", None, False),
+        ("employee_number", None, False),
+        ("password", None, False),
+        ("department_id", None, False),
+    ],
+)
+async def test_update_user_fields_set_to_none(
+    client,
+    create_user_in_database,
+    create_role_in_database,
+    create_department_in_database,
+    get_user_from_database,
+    field,
+    value,
+    should_fail,
+):
+    role_id = uuid4()
+    await create_role_in_database(
+        {"id": role_id, "name": "employee", "permissions": []}
+    )
+
+    department_id = uuid4()
+    await create_department_in_database(
+        {
+            "id": department_id,
+            "name": "dep",
+            "code": "d1",
+        }
+    )
+
+    user_id = await create_user_in_database(
+        {
+            "id": uuid4(),
+            "username": "john",
+            "first_name": "John",
+            "last_name": "Doe",
+            "patronymic": "M",
+            "employee_number": "token123",
+            "password": "Pass123!",
+            "role_ids": [str(role_id)],
+            "department_id": str(department_id),
+        }
+    )
+
+    headers = await create_auth_headers_for_user([Permissions.UPDATE_USER])
+
+    resp = client.patch(
+        f"{VERSION_URL}{USER_URL}/{user_id}",
+        json={field: value},
+        headers=headers,
+    )
+
+    if should_fail:
+        assert resp.status_code == 422
+        assert field in str(resp.json())
+        user_db = await get_user_from_database(user_id)
+        assert str(user_db["department_id"]) == str(department_id)
+    else:
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data[field] is None
+        user_db = await get_user_from_database(user_id)
+        assert user_db[field] is None

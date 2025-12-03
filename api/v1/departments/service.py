@@ -6,7 +6,7 @@ from db.db_exceptions import DBException
 
 
 class DepartmentService:
-    def init(self, repo: IDepartmentRepository):
+    def __init__(self, repo: IDepartmentRepository):
         self._repo: IDepartmentRepository = repo
 
     async def _is_department_exists(
@@ -28,7 +28,7 @@ class DepartmentService:
         self, department_info: CreateDepartment
     ) -> Department:
         try:
-            if self._is_department_exists(department_info):
+            if await self._is_department_exists(department_info):
                 raise AppExceptions.bad_request_exception(
                     "Department with provided parameters already exists"
                 )
@@ -62,8 +62,7 @@ class DepartmentService:
                 if new_department_info.code == department.code
                 else new_department_info.code
             )
-            new_department_info = new_department_info.model_dump(exclude_none=True)
-            if not new_department_info:
+            if not new_department_info.model_dump(exclude_none=True):
                 raise AppExceptions.validation_exception(
                     "At least one parameter must be defined"
                 )
@@ -77,4 +76,14 @@ class DepartmentService:
             raise AppExceptions.service_unavailable_exception("Database error.")
 
     async def delete_department_by_id(self, department_id: UUID) -> UUID:
-        return await self._repo.delete(department_id)
+        try:
+            departments: Department | None = await self._repo.get_departments(
+                id=department_id
+            )
+            if departments == []:
+                raise AppExceptions.not_found_exception(
+                    "Department with this id not found"
+                )
+            return await self._repo.delete(department_id)
+        except DBException:
+            raise AppExceptions.service_unavailable_exception("Database error.")

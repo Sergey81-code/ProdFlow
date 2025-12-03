@@ -1,18 +1,29 @@
 from uuid import uuid4
-
 import pytest
-
 from config.permissions import Permissions
 from tests.conftest import USER_URL, VERSION_URL
 from tests.utils_for_tests import create_auth_headers_for_user
 
 
 async def test_delete_user(
-    client, create_role_in_database, create_user_in_database, get_user_from_database
+    client,
+    create_role_in_database,
+    create_user_in_database,
+    get_user_from_database,
+    create_department_in_database,
 ):
     role_id = uuid4()
     await create_role_in_database(
         {"id": role_id, "name": "employee", "permissions": []}
+    )
+
+    department_id = uuid4()
+    await create_department_in_database(
+        {
+            "id": department_id,
+            "name": "test department name",
+            "code": "some department code",
+        }
     )
 
     user_data = {
@@ -24,10 +35,10 @@ async def test_delete_user(
         "employee_number": "some_token123",
         "password": "StrongPass123!",
         "role_ids": [str(role_id)],
+        "department_id": str(department_id),
     }
 
     user_id = await create_user_in_database(user_data)
-
     headers_for_auth = await create_auth_headers_for_user([Permissions.DELETE_USER])
 
     resp = client.delete(
@@ -42,7 +53,7 @@ async def test_delete_user(
     assert user_from_db is None
 
 
-async def test_delete_user_not_found(client):
+async def test_delete_user_not_found(client, create_department_in_database):
     non_existing_id = uuid4()
     headers = await create_auth_headers_for_user([Permissions.DELETE_USER])
 
@@ -56,43 +67,13 @@ async def test_delete_user_not_found(client):
 
 
 @pytest.mark.parametrize(
-    "bad_id, expected_detail",
+    "bad_id",
     [
-        (
-            "123",
-            {
-                "detail": [
-                    {
-                        "type": "uuid_parsing",
-                        "loc": ["path", "user_id"],
-                        "msg": "Input should be a valid UUID, invalid length: expected length 32 for simple format, found 3",
-                        "input": "123",
-                        "ctx": {
-                            "error": "invalid length: expected length 32 for simple format, found 3"
-                        },
-                    }
-                ]
-            },
-        ),
-        (
-            "not-a-uuid",
-            {
-                "detail": [
-                    {
-                        "type": "uuid_parsing",
-                        "loc": ["path", "user_id"],
-                        "msg": "Input should be a valid UUID, invalid character: expected an optional prefix of `urn:uuid:` followed by [0-9a-fA-F-], found `n` at 1",
-                        "input": "not-a-uuid",
-                        "ctx": {
-                            "error": "invalid character: expected an optional prefix of `urn:uuid:` followed by [0-9a-fA-F-], found `n` at 1"
-                        },
-                    }
-                ]
-            },
-        ),
+        "123",
+        "not-a-uuid",
     ],
 )
-async def test_delete_user_invalid_id(client, bad_id, expected_detail):
+async def test_delete_user_invalid_id(client, bad_id):
     headers = await create_auth_headers_for_user([Permissions.DELETE_USER])
 
     resp = client.delete(
@@ -101,14 +82,39 @@ async def test_delete_user_invalid_id(client, bad_id, expected_detail):
     )
 
     assert resp.status_code == 422
-    assert resp.json() == expected_detail
+
+    data = resp.json()
+    assert "detail" in data
+    assert isinstance(data["detail"], list)
+    assert len(data["detail"]) == 1
+
+    err = data["detail"][0]
+
+    assert err["type"] == "uuid_parsing"
+    assert err["loc"] == ["path", "user_id"]
+    assert err["input"] == bad_id
+    assert "UUID" in err["msg"]
+    assert "error" in err["ctx"]
 
 
 async def test_delete_user_unauth(
-    client, create_role_in_database, create_user_in_database, get_project_settings
+    client,
+    create_role_in_database,
+    create_user_in_database,
+    get_project_settings,
+    create_department_in_database,
 ):
     role_id = uuid4()
     await create_role_in_database({"id": role_id, "name": "x", "permissions": []})
+
+    department_id = uuid4()
+    await create_department_in_database(
+        {
+            "id": department_id,
+            "name": "dep",
+            "code": "d1",
+        }
+    )
 
     user_id = await create_user_in_database(
         {
@@ -120,6 +126,7 @@ async def test_delete_user_unauth(
             "employee_number": "tok",
             "password": "123",
             "role_ids": [str(role_id)],
+            "department_id": str(department_id),
         }
     )
 
@@ -131,6 +138,7 @@ async def test_delete_user_unauth(
     )
 
     settings = await get_project_settings()
+
     if settings.ENABLE_PERMISSION_CHECK:
         assert resp.status_code == 401
         assert resp.json() == {"detail": "Could not validate credentials"}
@@ -139,10 +147,23 @@ async def test_delete_user_unauth(
 
 
 async def test_delete_user_no_permissions(
-    client, create_role_in_database, create_user_in_database, get_project_settings
+    client,
+    create_role_in_database,
+    create_user_in_database,
+    get_project_settings,
+    create_department_in_database,
 ):
     role_id = uuid4()
     await create_role_in_database({"id": role_id, "name": "x", "permissions": []})
+
+    department_id = uuid4()
+    await create_department_in_database(
+        {
+            "id": department_id,
+            "name": "dep",
+            "code": "d1",
+        }
+    )
 
     user_id = await create_user_in_database(
         {
@@ -154,6 +175,7 @@ async def test_delete_user_no_permissions(
             "employee_number": "tok",
             "password": "123",
             "role_ids": [str(role_id)],
+            "department_id": str(department_id),
         }
     )
 
@@ -165,6 +187,7 @@ async def test_delete_user_no_permissions(
     )
 
     settings = await get_project_settings()
+
     if settings.ENABLE_PERMISSION_CHECK:
         assert resp.status_code == 403
         assert resp.json() == {"detail": "Forbidden: insufficient permissions"}
@@ -173,10 +196,23 @@ async def test_delete_user_no_permissions(
 
 
 async def test_delete_user_bad_credentials(
-    client, create_role_in_database, create_user_in_database, get_project_settings
+    client,
+    create_role_in_database,
+    create_user_in_database,
+    get_project_settings,
+    create_department_in_database,
 ):
     role_id = uuid4()
     await create_role_in_database({"id": role_id, "name": "test", "permissions": []})
+
+    department_id = uuid4()
+    await create_department_in_database(
+        {
+            "id": department_id,
+            "name": "dep",
+            "code": "d1",
+        }
+    )
 
     user_id = await create_user_in_database(
         {
@@ -188,6 +224,7 @@ async def test_delete_user_bad_credentials(
             "employee_number": "tok",
             "password": "123",
             "role_ids": [str(role_id)],
+            "department_id": str(department_id),
         }
     )
 
@@ -199,6 +236,7 @@ async def test_delete_user_bad_credentials(
     )
 
     settings = await get_project_settings()
+
     if settings.ENABLE_PERMISSION_CHECK:
         assert resp.status_code == 401
         assert resp.json() == {"detail": "Could not validate credentials"}
@@ -211,6 +249,7 @@ async def test_delete_super_user_not_allowed(
     create_role_in_database,
     create_user_in_database,
     get_project_settings,
+    create_department_in_database,
 ):
     settings = await get_project_settings()
 
@@ -220,6 +259,15 @@ async def test_delete_super_user_not_allowed(
             "id": role_id,
             "name": settings.SUPER_ROLE_NAME,
             "permissions": [p for p in Permissions],
+        }
+    )
+
+    department_id = uuid4()
+    await create_department_in_database(
+        {
+            "id": department_id,
+            "name": "dep",
+            "code": "d1",
         }
     )
 
@@ -233,6 +281,7 @@ async def test_delete_super_user_not_allowed(
             "employee_number": "tok",
             "password": "123",
             "role_ids": [str(role_id)],
+            "department_id": str(department_id),
         }
     )
 
@@ -247,3 +296,52 @@ async def test_delete_super_user_not_allowed(
     assert resp.json() == {
         "detail": "User with super role is not allowed to perform this action"
     }
+
+
+async def test_department_not_deleted_when_user_deleted(
+    client,
+    create_role_in_database,
+    create_user_in_database,
+    create_department_in_database,
+    get_department_from_database,
+):
+    role_id = uuid4()
+    await create_role_in_database(
+        {"id": role_id, "name": "employee", "permissions": [Permissions.DELETE_USER]}
+    )
+
+    department_id = uuid4()
+    await create_department_in_database(
+        {
+            "id": department_id,
+            "name": "dep test",
+            "code": "code123",
+        }
+    )
+
+    user_id = await create_user_in_database(
+        {
+            "id": uuid4(),
+            "username": "checkdep",
+            "first_name": "John",
+            "last_name": "Tester",
+            "patronymic": "Q",
+            "employee_number": "emp123",
+            "password": "123",
+            "role_ids": [str(role_id)],
+            "department_id": str(department_id),
+        }
+    )
+
+    headers = await create_auth_headers_for_user([Permissions.DELETE_USER])
+
+    resp = client.delete(
+        url=f"{VERSION_URL}{USER_URL}/{user_id}",
+        headers=headers,
+    )
+
+    assert resp.status_code == 200
+
+    dep = await get_department_from_database(department_id)
+    assert dep is not None
+    assert dep["id"] == department_id

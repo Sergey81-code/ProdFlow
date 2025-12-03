@@ -7,7 +7,9 @@ from tests.conftest import DEVICE_URL, VERSION_URL
 from tests.utils_for_tests import create_auth_headers_for_user
 
 
-async def test_update_device_name_success(client, create_device_in_database, get_device_from_database):
+async def test_update_device_name_success(
+    client, create_device_in_database, get_device_from_database
+):
     device_id = uuid4()
     original = {
         "id": device_id,
@@ -18,7 +20,9 @@ async def test_update_device_name_success(client, create_device_in_database, get
 
     body = {"name": "new name"}
     headers = await create_auth_headers_for_user([Permissions.UPDATE_DEVICE])
-    resp = client.patch(f"{VERSION_URL}{DEVICE_URL}/{device_id}", json=body, headers=headers)
+    resp = client.patch(
+        f"{VERSION_URL}{DEVICE_URL}/{device_id}", json=body, headers=headers
+    )
 
     assert resp.status_code == 200
     data = resp.json()
@@ -29,7 +33,9 @@ async def test_update_device_name_success(client, create_device_in_database, get
     assert device_from_db["name"] == "new name"
 
 
-async def test_update_device_android_id_success(client, create_device_in_database, get_device_from_database):
+async def test_update_device_android_id_success(
+    client, create_device_in_database, get_device_from_database
+):
     device_id = uuid4()
     original = {
         "id": device_id,
@@ -40,7 +46,9 @@ async def test_update_device_android_id_success(client, create_device_in_databas
 
     body = {"android_id": "new_android_id_12345"}
     headers = await create_auth_headers_for_user([Permissions.UPDATE_DEVICE])
-    resp = client.patch(f"{VERSION_URL}{DEVICE_URL}/{device_id}", json=body, headers=headers)
+    resp = client.patch(
+        f"{VERSION_URL}{DEVICE_URL}/{device_id}", json=body, headers=headers
+    )
 
     assert resp.status_code == 200
     data = resp.json()
@@ -50,7 +58,9 @@ async def test_update_device_android_id_success(client, create_device_in_databas
     assert device_from_db["android_id"] == "new_android_id_12345"
 
 
-async def test_update_device_both_name_and_android_id(client, create_device_in_database, get_device_from_database):
+async def test_update_device_both_name_and_android_id(
+    client, create_device_in_database, get_device_from_database
+):
     device_id = uuid4()
     original = {
         "id": device_id,
@@ -61,7 +71,9 @@ async def test_update_device_both_name_and_android_id(client, create_device_in_d
 
     body = {"name": "updated name", "android_id": "updated_android_id"}
     headers = await create_auth_headers_for_user([Permissions.UPDATE_DEVICE])
-    resp = client.patch(f"{VERSION_URL}{DEVICE_URL}/{device_id}", json=body, headers=headers)
+    resp = client.patch(
+        f"{VERSION_URL}{DEVICE_URL}/{device_id}", json=body, headers=headers
+    )
 
     assert resp.status_code == 200
     data = resp.json()
@@ -77,7 +89,9 @@ async def test_update_device_both_name_and_android_id(client, create_device_in_d
     "existing, new",
     [("Device1", "device1"), ("MyDevice", "MYDEVICE"), ("TestDevice", "testdevice")],
 )
-async def test_update_device_duplicate_name_case_insensitive(client, create_device_in_database, existing, new):
+async def test_update_device_duplicate_name_case_insensitive(
+    client, create_device_in_database, existing, new
+):
     first_id = uuid4()
     second_id = uuid4()
 
@@ -98,7 +112,9 @@ async def test_update_device_duplicate_name_case_insensitive(client, create_devi
     )
 
     headers = await create_auth_headers_for_user([Permissions.UPDATE_DEVICE])
-    resp = client.patch(f"{VERSION_URL}{DEVICE_URL}/{second_id}", json={"name": new}, headers=headers)
+    resp = client.patch(
+        f"{VERSION_URL}{DEVICE_URL}/{second_id}", json={"name": new}, headers=headers
+    )
 
     assert resp.status_code == 400
     assert resp.json() == {"detail": f"Device with name {new} already exists."}
@@ -157,7 +173,9 @@ async def test_update_device_not_found(client, create_device_in_database):
     assert resp.json() == {"detail": "Device with this id not found"}
 
 
-async def test_update_device_unauth(client, create_device_in_database, get_project_settings):
+async def test_update_device_unauth(
+    client, create_device_in_database, get_project_settings
+):
     device_id = uuid4()
     await create_device_in_database(
         {
@@ -167,7 +185,9 @@ async def test_update_device_unauth(client, create_device_in_database, get_proje
         }
     )
 
-    resp = client.patch(f"{VERSION_URL}{DEVICE_URL}/{device_id}", json={"name": "new name"})
+    resp = client.patch(
+        f"{VERSION_URL}{DEVICE_URL}/{device_id}", json={"name": "new name"}
+    )
 
     settings = await get_project_settings()
     if settings.ENABLE_PERMISSION_CHECK:
@@ -177,7 +197,9 @@ async def test_update_device_unauth(client, create_device_in_database, get_proje
         assert resp.status_code == 200
 
 
-async def test_update_device_no_permission(client, create_device_in_database, get_project_settings):
+async def test_update_device_no_permission(
+    client, create_device_in_database, get_project_settings
+):
     device_id = uuid4()
     await create_device_in_database(
         {
@@ -198,6 +220,34 @@ async def test_update_device_no_permission(client, create_device_in_database, ge
     if settings.ENABLE_PERMISSION_CHECK:
         assert resp.status_code == 403
         assert resp.json() == {"detail": "Forbidden: insufficient permissions"}
+    else:
+        assert resp.status_code == 200
+
+
+async def test_update_device_bad_token(
+    client, create_device_in_database, get_project_settings
+):
+    device_id = uuid4()
+    await create_device_in_database(
+        {
+            "id": device_id,
+            "name": "test device",
+            "android_id": "android123",
+        }
+    )
+
+    headers = await create_auth_headers_for_user([Permissions.UPDATE_DEVICE])
+    bad = {k: v + "broken" for k, v in headers.items()}
+    resp = client.patch(
+        f"{VERSION_URL}{DEVICE_URL}/{device_id}",
+        json={"name": "new name"},
+        headers=bad,
+    )
+
+    settings = await get_project_settings()
+    if settings.ENABLE_PERMISSION_CHECK:
+        assert resp.status_code == 401
+        assert resp.json() == {"detail": "Could not validate credentials"}
     else:
         assert resp.status_code == 200
 
@@ -233,7 +283,9 @@ async def test_update_device_empty_body(client, create_device_in_database):
     )
 
     headers = await create_auth_headers_for_user([Permissions.UPDATE_DEVICE])
-    resp = client.patch(f"{VERSION_URL}{DEVICE_URL}/{device_id}", json={}, headers=headers)
+    resp = client.patch(
+        f"{VERSION_URL}{DEVICE_URL}/{device_id}", json={}, headers=headers
+    )
 
     assert resp.status_code == 422
     assert resp.json() == {"detail": "At least one parameter must be defined"}
@@ -340,7 +392,9 @@ async def test_update_device_sql_injection_in_name(client, create_device_in_data
     assert resp.status_code == 200
 
 
-async def test_update_device_sql_injection_in_android_id(client, create_device_in_database):
+async def test_update_device_sql_injection_in_android_id(
+    client, create_device_in_database
+):
     device_id = uuid4()
     await create_device_in_database(
         {
@@ -361,7 +415,9 @@ async def test_update_device_sql_injection_in_android_id(client, create_device_i
     assert resp.status_code == 200
 
 
-async def test_update_device_partial_success_when_other_field_unchanged(client, create_device_in_database, get_device_from_database):
+async def test_update_device_partial_success_when_other_field_unchanged(
+    client, create_device_in_database, get_device_from_database
+):
     device_id = uuid4()
     original_name = "original name"
     original_android_id = "original_android_id"
@@ -375,7 +431,9 @@ async def test_update_device_partial_success_when_other_field_unchanged(client, 
 
     body = {"name": "updated name"}
     headers = await create_auth_headers_for_user([Permissions.UPDATE_DEVICE])
-    resp = client.patch(f"{VERSION_URL}{DEVICE_URL}/{device_id}", json=body, headers=headers)
+    resp = client.patch(
+        f"{VERSION_URL}{DEVICE_URL}/{device_id}", json=body, headers=headers
+    )
 
     assert resp.status_code == 200
     data = resp.json()

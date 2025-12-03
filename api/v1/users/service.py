@@ -2,6 +2,7 @@ from uuid import UUID
 
 from api.core.config import get_settings
 from api.core.exceptions import AppExceptions
+from api.v1.departments.repo_interface import IDepartmentRepository
 from api.v1.roles.repo_interface import IRoleRepository
 from api.v1.roles.schemas import Role
 from api.v1.users.repo_interface import IUserRepository
@@ -14,11 +15,13 @@ settings = get_settings()
 class UserService:
     def __init__(
         self,
-        user_repository_interface: IUserRepository,
-        role_repository_interface: IRoleRepository,
+        user_repository: IUserRepository,
+        role_repository: IRoleRepository,
+        department_repository: IDepartmentRepository,
     ):
-        self._repo: IUserRepository = user_repository_interface
-        self._role_repo: IRoleRepository = role_repository_interface
+        self._repo: IUserRepository = user_repository
+        self._role_repo: IRoleRepository = role_repository
+        self._department_repo: IDepartmentRepository = department_repository
 
     async def _has_super_role(
         self, user: User | CreateUser, roles: list[Role] | None = None
@@ -57,6 +60,9 @@ class UserService:
 
         return 0
 
+    async def _is_department_exists(self, department_id: UUID) -> bool:
+        return not await self._department_repo.get_departments(id=department_id) == []
+
     async def get_user_by_id(self, user_id: UUID) -> User:
         try:
             user: User | None = await self._repo.get_by_id(user_id)
@@ -92,13 +98,19 @@ class UserService:
                 raise AppExceptions.forbidden_exception(
                     "Creating a superuser is forbidden"
                 )
+            if user_info.department_id and not await self._is_department_exists(
+                user_info.department_id
+            ):
+                raise AppExceptions.bad_request_exception(
+                    f"Department with id {user_info.department_id} not found"
+                )
             return await self._repo.create(user_info)
         except DBException:
             raise AppExceptions.service_unavailable_exception("Database error.")
 
     async def update_user(self, user: User, body: CreateUser) -> User:
         try:
-            if not (user_info := body.model_dump(exclude_none=True)):
+            if not (user_info := body.model_dump(exclude_unset=True)):
                 raise AppExceptions.validation_exception(
                     "At least one parameter must be defined"
                 )

@@ -27,22 +27,25 @@ async def create_department(
 
 
 @router.get(
-    "/code/",
+    "/code/{department_code}",
     response_model=ShowDepartment,
     dependencies=[permission_required([Permissions.GET_DEPARTMENTS])],
 )
 async def get_department_by_code(
     department_code: str, service: DepartmentService = Depends(get_department_service)
 ) -> ShowDepartment:
-    return await service.get_departments(code=department_code)
+    departments = await service.get_departments(code=department_code)
+    return departments[0]
 
 
 @router.get("/", dependencies=[permission_required([Permissions.GET_DEPARTMENTS])])
 async def get_departments_by_name_or_all(
-    department_name: str | None,
+    department_name: str | None = None,
     service: DepartmentService = Depends(get_department_service),
 ) -> list[ShowDepartment]:
-    return await service.get_departments(department_name)
+    if department_name:
+        return await service.get_departments(name=department_name)
+    return await service.get_departments()
 
 
 @router.get(
@@ -53,7 +56,8 @@ async def get_departments_by_name_or_all(
 async def get_department_by_id(
     department_id: UUID, service: DepartmentService = Depends(get_department_service)
 ) -> ShowDepartment:
-    return await service.get_departments(id=department_id)[0]
+    departments = await service.get_departments(id=department_id)
+    return departments[0]
 
 
 @router.patch(
@@ -66,7 +70,7 @@ async def update_department(
     body: UpdateDepartment,
     service: DepartmentService = Depends(get_department_service),
 ) -> ShowDepartment:
-    department = await service.get_departments(id=department_id)[0]
+    department = (await service.get_departments(id=department_id))[0]
     return await service.update_department(department, body)
 
 

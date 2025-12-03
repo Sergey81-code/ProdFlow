@@ -26,8 +26,9 @@ async def get_role_service(
 async def get_user_service(
     repo: IUserRepository = Depends(get_user_repository),
     role_repo: IRoleRepository = Depends(get_role_repository),
+    department_repo: IDepartmentRepository = Depends(get_department_repository),
 ):
-    return UserService(repo, role_repo)
+    return UserService(repo, role_repo, department_repo)
 
 
 async def get_device_service(

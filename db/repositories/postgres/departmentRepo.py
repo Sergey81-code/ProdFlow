@@ -9,7 +9,7 @@ from db.models import Department as DepartmentDb
 
 
 class PostgresDepartmentRepo(IDepartmentRepository):
-    def init(self, session: AsyncSession):
+    def __init__(self, session: AsyncSession):
         self._session = session
 
     async def create(self, department_info: CreateDepartment) -> Department:

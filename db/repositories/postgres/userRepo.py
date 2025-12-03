@@ -39,7 +39,7 @@ class PostgresUserRepo(IUserRepository):
         return User.model_validate(user)
 
     async def update(self, user: User, info: UpdateUser) -> User:
-        user_data = info.model_dump(exclude_none=True)
+        user_data = info.model_dump(exclude_unset=True)
         role_ids = user_data.pop("role_ids", None)
 
         if user_data:

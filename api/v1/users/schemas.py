@@ -86,21 +86,10 @@ class UpdateUser(BaseModel):
     employee_number: str | None = None
     department_id: UUID | None = None
 
-    @field_validator("password")
-    def validate_password(cls, value):
-        if value is None:
-            return value
-        pass_validation = validator.validate_password(value)
-        if not pass_validation[0]:
-            raise ValueError(pass_validation[1])
-        if len(value) > 99:
-            raise ValueError("Field length must be <= 99 characters")
-        return value
-
-    @field_validator("username", "first_name", "last_name")
+    @field_validator("username", "first_name", "last_name", mode="before")
     def not_empty(cls, value):
         if value is None:
-            return value
+            raise ValueError("Field cannot be None")
         if not value.strip():
             raise ValueError("Field cannot be empty")
         if len(value) > 99:
@@ -122,3 +111,14 @@ class UpdateUser(BaseModel):
         if len(value) > 64:
             raise ValueError("Field length must be <= 64 characters")
         return value.strip()
+
+    @field_validator("password")
+    def validate_password(cls, value):
+        if value is None:
+            return value
+        pass_validation = validator.validate_password(value)
+        if not pass_validation[0]:
+            raise ValueError(pass_validation[1])
+        if len(value) > 99:
+            raise ValueError("Field length must be <= 99 characters")
+        return value

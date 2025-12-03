@@ -112,3 +112,28 @@ async def _create_users(create_user_in_database, role_ids):
     for user in users:
         await create_user_in_database(user)
     return users
+
+
+async def _create_departments(create_department_in_database):
+    departments = [
+        {
+            "id": uuid4(),
+            "name": "Test Department 1",
+            "code": "test1",
+        },
+        {
+            "id": uuid4(),
+            "name": "Test Department 2",
+            "code": "test2",
+        },
+        {
+            "id": uuid4(),
+            "name": "Test Department 3",
+            "code": "test3",
+        },
+    ]
+
+    for department in departments:
+        await create_department_in_database(department)
+
+    return departments

@@ -25,6 +25,7 @@ VERSION_URL = "/v1"
 USER_URL = "/users"
 DEVICE_URL = "/devices"
 ROLE_URL = "/roles"
+DEPARTMENT_URL = "/departments"
 LOGIN_URL = "/auth"
 
 
@@ -176,6 +177,18 @@ async def get_device_from_database() -> Callable[[UUID], dict[str, Any] | None]:
             return dict(device) if device else None
 
     return get_device_from_database_by_id
+
+
+@pytest.fixture
+async def get_department_from_database() -> Callable[[UUID], dict[str, Any] | None]:
+    async def get_department_from_database_by_id(
+        obj_id: UUID,
+    ) -> dict[str, Any] | None:
+        async with TestDAL(DSN_FOR_TESTDAL) as dal:
+            department = await dal.get_obj_from_database_by_id("departments", obj_id)
+            return dict(department) if department else None
+
+    return get_department_from_database_by_id
 
 
 @pytest.fixture

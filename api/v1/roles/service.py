@@ -25,9 +25,18 @@ class RoleService:
     async def create_role_in_database(self, role_info: CreateRole) -> Role:
         try:
             if role_info.name.lower() == settings.SUPER_ROLE_NAME.lower():
-                raise AppExceptions.forbidden_exception("Role with this name is not allowed to create")
-            if await self._repo.get_by_name(role_info.name, exact_match=True, case_sensitive=False) != []:
-                raise AppExceptions.bad_request_exception(f"Role with name {role_info.name} already exists.")
+                raise AppExceptions.forbidden_exception(
+                    "Role with this name is not allowed to create"
+                )
+            if (
+                await self._repo.get_by_name(
+                    role_info.name, exact_match=True, case_sensitive=False
+                )
+                != []
+            ):
+                raise AppExceptions.bad_request_exception(
+                    f"Role with name {role_info.name} already exists."
+                )
             return await self._repo.create(role_info)
         except DBException:
             raise AppExceptions.service_unavailable_exception("Database error.")
@@ -35,14 +44,26 @@ class RoleService:
     async def update_role(self, role: Role, body: CreateRole) -> Role:
         try:
             if role.name.lower() == settings.SUPER_ROLE_NAME.lower():
-                raise AppExceptions.forbidden_exception("Super role is not allowed to perform this action")
+                raise AppExceptions.forbidden_exception(
+                    "Super role is not allowed to perform this action"
+                )
 
-            if body.name and body.name != role.name and await self._repo.get_by_name(body.name, exact_match=True, case_sensitive=False) != []:
-                raise AppExceptions.bad_request_exception(f"Role with name {body.name} already exists.")
+            if (
+                body.name
+                and body.name != role.name
+                and await self._repo.get_by_name(
+                    body.name, exact_match=True, case_sensitive=False
+                )
+                != []
+            ):
+                raise AppExceptions.bad_request_exception(
+                    f"Role with name {body.name} already exists."
+                )
 
-            role_info = body.model_dump(exclude_none=True)
-            if not role_info:
-                raise AppExceptions.validation_exception("At least one parameter must be defined")
+            if not body.model_dump(exclude_none=True):
+                raise AppExceptions.validation_exception(
+                    "At least one parameter must be defined"
+                )
             return await self._repo.update(role, body)
         except DBException:
             raise AppExceptions.service_unavailable_exception("Database error.")
@@ -53,7 +74,9 @@ class RoleService:
             if role is None:
                 raise AppExceptions.not_found_exception("Role with this id not found")
             if role.name == settings.SUPER_ROLE_NAME:
-                raise AppExceptions.forbidden_exception("Super role is not allowed to perform this action")
+                raise AppExceptions.forbidden_exception(
+                    "Super role is not allowed to perform this action"
+                )
             return await self._repo.delete(role_id)
         except DBException:
             raise AppExceptions.service_unavailable_exception("Database error.")

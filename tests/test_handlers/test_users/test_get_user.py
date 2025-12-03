@@ -12,10 +12,24 @@ from tests.utils_for_tests import (
 from utils.jwt import JWT
 
 
-async def test_get_user(client, create_user_in_database, create_role_in_database):
+async def test_get_user(
+    client,
+    create_user_in_database,
+    create_role_in_database,
+    create_department_in_database,
+):
     role_ids = [
         str(role["id"]) for role in await _create_roles(create_role_in_database)
     ]
+
+    department_id = uuid4()
+    await create_department_in_database(
+        {
+            "id": department_id,
+            "name": "test department name",
+            "code": "some department code",
+        }
+    )
     user_id = uuid4()
     user_info = {
         "id": user_id,
@@ -25,6 +39,7 @@ async def test_get_user(client, create_user_in_database, create_role_in_database
         "patronymic": "Martin",
         "employee_number": "some_token123",
         "role_ids": role_ids,
+        "department_id": str(department_id),
     }
 
     await create_user_in_database(user_info.copy())
@@ -40,6 +55,7 @@ async def test_get_user(client, create_user_in_database, create_role_in_database
     assert data["last_name"] == user_info["last_name"]
     assert data["patronymic"] == user_info["patronymic"]
     assert data["employee_number"] == user_info["employee_number"]
+    assert data["department_id"] == user_info["department_id"]
     assert set(user_info["role_ids"]) == set([role["id"] for role in data["roles"]])
 
 

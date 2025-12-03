@@ -9,11 +9,23 @@ from tests.utils_for_tests import create_auth_headers_for_user
 
 
 async def test_create_user_success(
-    client, get_user_from_database, create_role_in_database
+    client,
+    get_user_from_database,
+    create_role_in_database,
+    create_department_in_database,
 ):
     role_id = uuid4()
     await create_role_in_database(
         {"id": role_id, "name": "employee", "permissions": []}
+    )
+
+    department_id = uuid4()
+    await create_department_in_database(
+        {
+            "id": department_id,
+            "name": "test department name",
+            "code": "some department code",
+        }
     )
 
     user_data = {
@@ -24,6 +36,7 @@ async def test_create_user_success(
         "employee_number": "some_token123",
         "password": "StrongPass123!",
         "role_ids": [str(role_id)],
+        "department_id": str(department_id),
     }
 
     resp = client.post(
@@ -39,6 +52,7 @@ async def test_create_user_success(
     assert data["last_name"] == user_data["last_name"]
     assert data["patronymic"] == user_data["patronymic"]
     assert data["employee_number"] == user_data["employee_number"]
+    assert data["department_id"] == user_data["department_id"]
     assert [str(role_id)] == [role["id"] for role in data["roles"]]
 
     user_from_db: dict[str, Any] = await get_user_from_database(data["id"])
@@ -47,6 +61,7 @@ async def test_create_user_success(
     assert user_from_db["last_name"] == user_data["last_name"]
     assert user_from_db["patronymic"] == user_data["patronymic"]
     assert user_from_db["employee_number"] == user_data["employee_number"]
+    assert str(user_from_db["department_id"]) == user_data["department_id"]
     assert set([role_id]) == set([role["id"] for role in user_from_db["roles"]])
 
 
@@ -59,11 +74,21 @@ async def test_create_user_success(
     ],
 )
 async def test_create_user_duplicate_username_case_insensitive(
-    client, create_user_in_database, create_role_in_database, existing, new
+    client,
+    create_user_in_database,
+    create_role_in_database,
+    create_department_in_database,
+    existing,
+    new,
 ):
     role_id = uuid4()
     await create_role_in_database(
         {"id": role_id, "name": "employee", "permissions": []}
+    )
+
+    department_id = uuid4()
+    await create_department_in_database(
+        {"id": department_id, "name": "dep", "code": "D"}
     )
 
     await create_user_in_database(
@@ -73,6 +98,7 @@ async def test_create_user_duplicate_username_case_insensitive(
             "first_name": "x",
             "last_name": "y",
             "password": "StrongPass123!",
+            "department_id": department_id,
         }
     )
 
@@ -84,6 +110,7 @@ async def test_create_user_duplicate_username_case_insensitive(
             "last_name": "B",
             "password": "StrongPass123!",
             "role_ids": [str(role_id)],
+            "department_id": str(department_id),
         },
         headers=await create_auth_headers_for_user([Permissions.CREATE_USER]),
     )
@@ -96,10 +123,17 @@ async def test_create_user_duplicate_username_case_insensitive(
     "password",
     ["", "short", "123", "abcdef", None],
 )
-async def test_create_user_invalid_password(client, password, create_role_in_database):
+async def test_create_user_invalid_password(
+    client, password, create_role_in_database, create_department_in_database
+):
     role_id = uuid4()
     await create_role_in_database(
         {"id": role_id, "name": "employee", "permissions": []}
+    )
+
+    department_id = uuid4()
+    await create_department_in_database(
+        {"id": department_id, "name": "test", "code": "X"}
     )
 
     resp = client.post(
@@ -110,6 +144,7 @@ async def test_create_user_invalid_password(client, password, create_role_in_dat
             "last_name": "B",
             "password": password,
             "role_ids": [str(role_id)],
+            "department_id": str(department_id),
         },
         headers=await create_auth_headers_for_user([Permissions.CREATE_USER]),
     )
@@ -117,8 +152,14 @@ async def test_create_user_invalid_password(client, password, create_role_in_dat
     assert "password" in str(resp.json()).lower()
 
 
-async def test_create_user_role_not_found(client):
+async def test_create_user_role_not_found(client, create_department_in_database):
     missing = uuid4()
+
+    department_id = uuid4()
+    await create_department_in_database(
+        {"id": department_id, "name": "test", "code": "Z"}
+    )
+
     resp = client.post(
         f"{VERSION_URL}{USER_URL}/",
         json={
@@ -127,6 +168,7 @@ async def test_create_user_role_not_found(client):
             "last_name": "B",
             "password": "StrongPass123!",
             "role_ids": [str(missing)],
+            "department_id": str(department_id),
         },
         headers=await create_auth_headers_for_user([Permissions.CREATE_USER]),
     )
@@ -134,7 +176,12 @@ async def test_create_user_role_not_found(client):
     assert resp.json() == {"detail": f"Role with id {missing} not found"}
 
 
-async def test_create_user_not_authenticated(client, get_project_settings):
+async def test_create_user_not_authenticated(
+    client, get_project_settings, create_department_in_database
+):
+    department_id = uuid4()
+    await create_department_in_database({"id": department_id, "name": "T", "code": "C"})
+
     resp = client.post(
         f"{VERSION_URL}{USER_URL}/",
         json={
@@ -142,6 +189,7 @@ async def test_create_user_not_authenticated(client, get_project_settings):
             "first_name": "A",
             "last_name": "B",
             "password": "Pass123!",
+            "department_id": str(department_id),
         },
     )
     settings = await get_project_settings()
@@ -154,12 +202,15 @@ async def test_create_user_not_authenticated(client, get_project_settings):
 
 
 async def test_create_user_bad_token(
-    client, get_project_settings, create_role_in_database
+    client, get_project_settings, create_role_in_database, create_department_in_database
 ):
     role_id = uuid4()
     await create_role_in_database(
         {"id": role_id, "name": "employee", "permissions": []}
     )
+
+    department_id = uuid4()
+    await create_department_in_database({"id": department_id, "name": "A", "code": "B"})
 
     headers = await create_auth_headers_for_user([Permissions.CREATE_USER])
     bad = {k: v + "broken" for k, v in headers.items()}
@@ -172,6 +223,7 @@ async def test_create_user_bad_token(
             "last_name": "B",
             "password": "Pass123!",
             "role_ids": [str(role_id)],
+            "department_id": str(department_id),
         },
         headers=bad,
     )
@@ -185,12 +237,15 @@ async def test_create_user_bad_token(
 
 
 async def test_create_user_no_permission(
-    client, get_project_settings, create_role_in_database
+    client, get_project_settings, create_role_in_database, create_department_in_database
 ):
     role_id = uuid4()
     await create_role_in_database(
         {"id": role_id, "name": "employee", "permissions": []}
     )
+
+    department_id = uuid4()
+    await create_department_in_database({"id": department_id, "name": "A", "code": "B"})
 
     resp = client.post(
         f"{VERSION_URL}{USER_URL}/",
@@ -200,6 +255,7 @@ async def test_create_user_no_permission(
             "last_name": "B",
             "password": "Pass123!",
             "role_ids": [str(role_id)],
+            "department_id": str(department_id),
         },
         headers=await create_auth_headers_for_user([Permissions.GET_USERS]),
     )
@@ -215,8 +271,8 @@ async def test_create_user_no_permission(
 @pytest.mark.parametrize(
     "body, expected_missing",
     [
-        ({}, ["username", "first_name", "last_name"]),
-        ({"username": "a"}, ["first_name", "last_name"]),
+        ({}, ["username", "first_name", "last_name", "department_id"]),
+        ({"username": "a"}, ["first_name", "last_name", "department_id"]),
         ({"first_name": "A", "last_name": "B"}, ["username"]),
         (
             {"username": "", "first_name": "A", "last_name": "B", "password": "Strong"},
@@ -247,14 +303,28 @@ async def test_create_user_no_permission(
     ],
 )
 async def test_create_user_validation(
-    client, body, expected_missing, create_role_in_database
+    client,
+    body,
+    expected_missing,
+    create_role_in_database,
+    create_department_in_database,
 ):
     role_id = uuid4()
     await create_role_in_database(
         {"id": role_id, "name": "employee", "permissions": []}
     )
 
-    body = {**body, "role_ids": [str(role_id)]}
+    # всегда добавляем корректный department_id если его нет
+    department_id = uuid4()
+    await create_department_in_database({"id": department_id, "name": "D", "code": "X"})
+
+    body = {
+        **body,
+        "role_ids": [str(role_id)],
+        **(
+            {"department_id": str(department_id)} if "department_id" not in body else {}
+        ),
+    }
 
     resp = client.post(
         f"{VERSION_URL}{USER_URL}/",
@@ -269,7 +339,7 @@ async def test_create_user_validation(
 
 
 async def test_create_user_super_admin_not_allowed(
-    client, create_role_in_database, get_project_settings
+    client, create_role_in_database, create_department_in_database, get_project_settings
 ):
     role_id = uuid4()
     settings = await get_project_settings()
@@ -278,12 +348,16 @@ async def test_create_user_super_admin_not_allowed(
         {"id": role_id, "name": settings.SUPER_ROLE_NAME, "permissions": []}
     )
 
+    department_id = uuid4()
+    await create_department_in_database({"id": department_id, "name": "X", "code": "Y"})
+
     user_data = {
         "username": "johndoe",
         "first_name": "John",
         "last_name": "Doe",
         "password": "StrongPass123!",
         "role_ids": [str(role_id)],
+        "department_id": str(department_id),
     }
 
     resp = client.post(
@@ -294,3 +368,52 @@ async def test_create_user_super_admin_not_allowed(
 
     assert resp.status_code == 403
     assert resp.json() == {"detail": "Creating a superuser is forbidden"}
+
+
+@pytest.mark.parametrize("dep", ["", "not-uuid", 123])
+async def test_create_user_invalid_department_id(client, dep, create_role_in_database):
+    role_id = uuid4()
+    await create_role_in_database(
+        {"id": role_id, "name": "employee", "permissions": []}
+    )
+
+    resp = client.post(
+        f"{VERSION_URL}{USER_URL}/",
+        json={
+            "username": "abc",
+            "first_name": "A",
+            "last_name": "B",
+            "password": "Pass123!",
+            "role_ids": [str(role_id)],
+            "department_id": dep,
+        },
+        headers=await create_auth_headers_for_user([Permissions.CREATE_USER]),
+    )
+
+    assert resp.status_code == 422
+    assert "department_id" in str(resp.json()).lower()
+
+
+async def test_create_user_department_not_found(client, create_role_in_database):
+    role_id = uuid4()
+    await create_role_in_database(
+        {"id": role_id, "name": "employee", "permissions": []}
+    )
+
+    missing_dep = uuid4()
+
+    resp = client.post(
+        f"{VERSION_URL}{USER_URL}/",
+        json={
+            "username": "abc",
+            "first_name": "A",
+            "last_name": "B",
+            "password": "Pass123!",
+            "role_ids": [str(role_id)],
+            "department_id": str(missing_dep),
+        },
+        headers=await create_auth_headers_for_user([Permissions.CREATE_USER]),
+    )
+
+    assert resp.status_code == 400
+    assert resp.json() == {"detail": f"Department with id {missing_dep} not found"}

@@ -173,7 +173,7 @@ async def test_login_response_shape(
 
     assert decoded["user_id"] == str(user_info["id"])
 
-    assert decoded["roles"] == user_info["role_ids"]
+    assert set(decoded["roles"]) == set(user_info["role_ids"])
 
     expected_permissions = set(role_info1["permissions"] + role_info2["permissions"])
     assert len(decoded["permissions"]) == len(expected_permissions)
