@@ -88,43 +88,41 @@ async def prompt_for_superadmin_credentials():
 
 async def create_superadmin(username, password, name, surname, session):
     """Create a superadmin in the database"""
-    async with session.begin():
-        super_role_id_or_none = await check_creation_super_role(
-            settings.SUPER_ROLE_NAME, session
-        )
-        if super_role_id_or_none is None:
-            new_super_role = Role(
-                id=uuid4(),
-                name=settings.SUPER_ROLE_NAME,
-                permissions=[permission for permission in Permissions],
-            )
-            try:
-                session.add(new_super_role)
-                await session.flush()
-                super_role_id_or_none = new_super_role.id
-            except Exception as e:
-                print(f"Unexpected error: {e}")
-
-        new_superuser = User(
+    super_role_id_or_none = await check_creation_super_role(
+        settings.SUPER_ROLE_NAME, session
+    )
+    if super_role_id_or_none is None:
+        new_super_role = Role(
             id=uuid4(),
-            username=username,
-            first_name=name,
-            last_name=surname,
-            password=password,
+            name=settings.SUPER_ROLE_NAME,
+            permissions=[permission for permission in Permissions],
         )
-
-        new_role_of_user = UserRole(
-            role_id=super_role_id_or_none, user_id=new_superuser.id
-        )
-
         try:
-            session.add(new_superuser)
-            session.add(new_role_of_user)
-            print(f"Superadmin {username} was created successfully!")
-        except TypeError:
-            print("Error: possibly an incorrect argument name in the User model.")
+            session.add(new_super_role)
+            await session.flush()
+            super_role_id_or_none = new_super_role.id
         except Exception as e:
             print(f"Unexpected error: {e}")
+
+    new_superuser = User(
+        id=uuid4(),
+        username=username,
+        first_name=name,
+        last_name=surname,
+        password=password,
+    )
+
+    new_role_of_user = UserRole(role_id=super_role_id_or_none, user_id=new_superuser.id)
+
+    try:
+        session.add(new_superuser)
+        session.add(new_role_of_user)
+        await session.commit()
+        print(f"Superadmin {username} was created successfully!")
+    except TypeError:
+        print("Error: possibly an incorrect argument name in the User model.")
+    except Exception as e:
+        print(f"Unexpected error: {e}")
 
 
 if __name__ == "__main__":

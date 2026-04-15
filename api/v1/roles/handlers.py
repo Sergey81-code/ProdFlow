@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends
 from api.core.dependencies.jwt_access import permission_required
 from api.core.dependencies.services import get_role_service
 from api.v1.roles.schemas import CreateRole, ShowRole, UpdateRole
-from api.v1.roles.service import RoleService
+from app.roles.service import RoleService
 from config.permissions import Permissions
 
 router = APIRouter()
@@ -40,7 +40,8 @@ async def create_role(
     body: CreateRole,
     role_service: RoleService = Depends(get_role_service),
 ) -> ShowRole:
-    return await role_service.create_role_in_database(body)
+    role_info = body.model_dump(exclude_none=True)
+    return await role_service.create_role_in_database(role_info)
 
 
 @router.patch(
@@ -54,7 +55,8 @@ async def update_role(
     role_service: RoleService = Depends(get_role_service),
 ) -> ShowRole:
     role = await role_service.get_role_by_id(role_id)
-    return await role_service.update_role(role, body)
+    role_info = body.model_dump(exclude_unset=True)
+    return await role_service.update_role(role, role_info)
 
 
 @router.delete(

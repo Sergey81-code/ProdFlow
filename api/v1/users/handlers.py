@@ -4,9 +4,9 @@ from fastapi import APIRouter, Depends
 
 from api.core.dependencies.jwt_access import get_user_token, permission_required
 from api.core.dependencies.services import get_user_service
-from api.core.exceptions import AppExceptions
+from app.core.exceptions.api_exceptions import ApiExceptions
 from api.v1.users.schemas import CreateUser, ShowUser, UpdateUser
-from api.v1.users.service import UserService
+from app.users.service import UserService
 from config.permissions import Permissions
 
 router = APIRouter()
@@ -20,7 +20,7 @@ async def get_me(
     username = user_decode_token.get("sub")
 
     if not username:
-        raise AppExceptions.unauthorized_exception("Invalid token: username not found")
+        raise ApiExceptions.unauthorized_exception("Invalid token: username not found")
 
     return await user_service.get_user_by_username(username)
 
@@ -46,7 +46,8 @@ async def create_user(
     body: CreateUser,
     user_service: UserService = Depends(get_user_service),
 ) -> ShowUser:
-    return await user_service.create_user_in_database(body)
+    user_info = body.model_dump(exclude_none=True)
+    return await user_service.create_user_in_database(user_info)
 
 
 @router.patch(
@@ -60,7 +61,8 @@ async def update_user(
     user_service: UserService = Depends(get_user_service),
 ) -> ShowUser:
     user = await user_service.get_user_by_id(user_id)
-    return await user_service.update_user(user, body)
+    updated_user_info = body.model_dump(exclude_unset=True)
+    return await user_service.update_user(user, updated_user_info)
 
 
 @router.delete(

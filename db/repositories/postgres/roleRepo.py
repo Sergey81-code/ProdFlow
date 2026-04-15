@@ -1,10 +1,12 @@
+from typing import Any
 from uuid import UUID
 
 from sqlalchemy import delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.v1.roles.repo_interface import IRoleRepository
-from api.v1.roles.schemas import CreateRole, Role, UpdateRole
+from app.roles.models import Role
+from app.roles.repo_interface import IRoleRepository
+
 from db.models import Role as RoleDb, UserRole
 
 
@@ -18,18 +20,18 @@ class PostgresRoleRepo(IRoleRepository):
         role = result.scalar_one_or_none()
         return Role.model_validate(role) if role else None
 
-    async def create(self, info: CreateRole) -> Role:
-        role = RoleDb(**info.model_dump(exclude_none=True))
+    async def create(self, role_info: dict[str, Any]) -> Role:
+        role = RoleDb(**role_info)
         self._session.add(role)
         await self._session.commit()
         await self._session.refresh(role)
         return Role.model_validate(role)
 
-    async def update(self, role: Role, info: UpdateRole) -> Role:
+    async def update(self, role: Role, role_info: dict[str, Any]) -> Role:
         stmt = (
             update(RoleDb)
             .where(RoleDb.id == role.id)
-            .values(**info.model_dump(exclude_none=True))
+            .values(**role_info)
             .returning(RoleDb)
         )
         result = await self._session.execute(stmt)

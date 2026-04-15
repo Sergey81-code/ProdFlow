@@ -8,7 +8,7 @@ from api.v1.departments.schemas import (
     ShowDepartment,
     UpdateDepartment,
 )
-from api.v1.departments.service import DepartmentService
+from app.departments.service import DepartmentService
 from config.permissions import Permissions
 
 
@@ -23,7 +23,8 @@ router = APIRouter()
 async def create_department(
     body: CreateDepartment, service: DepartmentService = Depends(get_department_service)
 ) -> ShowDepartment:
-    return await service.create_department_in_database(body)
+    department_info = body.model_dump(exclude_none=True)
+    return await service.create_department_in_database(department_info)
 
 
 @router.get(
@@ -71,7 +72,8 @@ async def update_department(
     service: DepartmentService = Depends(get_department_service),
 ) -> ShowDepartment:
     department = (await service.get_departments(id=department_id))[0]
-    return await service.update_department(department, body)
+    department_info = body.model_dump(exclude_none=True)
+    return await service.update_department(department, department_info)
 
 
 @router.delete(

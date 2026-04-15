@@ -1,0 +1,466 @@
+Folder PATH listing for volume Windows 10
+Volume serial number is 600F-27E5
+C:.
+|   alembic.ini
+|   docker-compose.yaml
+|   main.py
+|   Makefile
+|   project_structure.txt
+|   pyproject.toml
+|   pytest.ini
+|   README.md
+|   requirements.txt
+|   setup.py
+|   uv.lock
+|   
+|       
++---api
+|   |   __init__.py
+|   |   
+|   +---core
+|   |   |   config.py
+|   |   |   routers.py
+|   |   |   
+|   |   +---dependencies
+|   |   |   |   integrations.py
+|   |   |   |   jwt_access.py
+|   |   |   |   repositories.py
+|   |   |   |   services.py
+|   |   |   |   
+|   |   |           integrations.cpython-312.pyc
+|   |   |           jwt_access.cpython-312.pyc
+|   |   |           repositories.cpython-312.pyc
+|   |   |           services.cpython-312.pyc
+|   |   |           
+|   |   +---logging
+|   |   |   |   handlers.py
+|   |   |   |   logger_config.py
+|   |   |   |   logging_middleware.py
+|   |   |   |   
+|   |   |           handlers.cpython-312.pyc
+|   |   |           logger_config.cpython-312.pyc
+|   |   |           logging_middleware.cpython-312.pyc
+|   |   |           
+|   |           config.cpython-312.pyc
+|   |           exceptions.cpython-312.pyc
+|   |           logger_config.cpython-312.pyc
+|   |           routers.cpython-312.pyc
+|   |           
+|   +---v1
+|   |   +---auth
+|   |   |   |   handlers.py
+|   |   |   |   schemas.py
+|   |   |   |   service.py
+|   |   |   |   
+|   |   |           handlers.cpython-312.pyc
+|   |   |           schemas.cpython-312.pyc
+|   |   |           service.cpython-312.pyc
+|   |   |           
+|   |   +---departments
+|   |   |   |   handlers.py
+|   |   |   |   schemas.py
+|   |   |   |   
+|   |   |           handlers.cpython-312.pyc
+|   |   |           repo_interface.cpython-312.pyc
+|   |   |           schemas.cpython-312.pyc
+|   |   |           service.cpython-312.pyc
+|   |   |           
+|   |   +---devices
+|   |   |   |   handlers.py
+|   |   |   |   schemas.py
+|   |   |   |   
+|   |   |           handlers.cpython-312.pyc
+|   |   |           repo_interface.cpython-312.pyc
+|   |   |           schemas.cpython-312.pyc
+|   |   |           service.cpython-312.pyc
+|   |   |           
+|   |   +---operations
+|   |   +---operation_stages
+|   |   |   |   handlers.py
+|   |   |   |   schemas.py
+|   |   |   |   
+|   |   |           repo_interface.cpython-312.pyc
+|   |   |           schemas.cpython-312.pyc
+|   |   |           service.cpython-312.pyc
+|   |   |           
+|   |   +---production
+|   |   |   |   handlers.py
+|   |   |   |   schemas.py
+|   |   |   |   
+|   |   |           handlers.cpython-312.pyc
+|   |   |           schemas.cpython-312.pyc
+|   |   |           
+|   |   +---roles
+|   |   |   |   handlers.py
+|   |   |   |   schemas.py
+|   |   |   |   
+|   |   |           handlers.cpython-312.pyc
+|   |   |           repo_interface.cpython-312.pyc
+|   |   |           schemas.cpython-312.pyc
+|   |   |           service.cpython-312.pyc
+|   |   |           
+|   |   \---users
+|   |       |   handlers.py
+|   |       |   schemas.py
+|   |       |   
+|   |               handlers.cpython-312.pyc
+|   |               repo_interface.cpython-312.pyc
+|   |               schemas.cpython-312.pyc
+|   |               service.cpython-312.pyc
+|   |               
+|           __init__.cpython-312.pyc
+|           
++---app
+|   +---core
+|   |   +---exceptions
+|   |   |   |   api_exceptions.py
+|   |   |   |   db_exceptions.py
+|   |   |   |   
+|   |   |           api_exceptions.cpython-312.pyc
+|   |   |           db_exceptions.cpython-312.pyc
+|   |   |           
+|   |           exceptions.cpython-312.pyc
+|   |           
+|   +---departments
+|   |   |   models.py
+|   |   |   repo_interface.py
+|   |   |   service.py
+|   |   |   __init__.py
+|   |   |   
+|   |           models.cpython-312.pyc
+|   |           repo_interface.cpython-312.pyc
+|   |           service.cpython-312.pyc
+|   |           __init__.cpython-312.pyc
+|   |           
+|   +---devices
+|   |   |   models.py
+|   |   |   repo_interface.py
+|   |   |   service.py
+|   |   |   __init__.py
+|   |   |   
+|   |           models.cpython-312.pyc
+|   |           repo_interface.cpython-312.pyc
+|   |           service.cpython-312.pyc
+|   |           __init__.cpython-312.pyc
+|   |           
+|   +---operation_stages
+|   |   |   models.py
+|   |   |   repo_interface.py
+|   |   |   service.py
+|   |   |   
+|   |           models.cpython-312.pyc
+|   |           repo_interface.cpython-312.pyc
+|   |           service.cpython-312.pyc
+|   |           
+|   +---production_journal
+|   |   |   models.py
+|   |   |   repo_interface.py
+|   |   |   __init__.py
+|   |   |   
+|   |           models.cpython-312.pyc
+|   |           repo_interface.cpython-312.pyc
+|   |           __init__.cpython-312.pyc
+|   |           
+|   +---production_journal_routes
+|   |   |   models.py
+|   |   |   repo_interface.py
+|   |   |   __init__.py
+|   |   |   
+|   |           models.cpython-312.pyc
+|   |           repo_interface.cpython-312.pyc
+|   |           __init__.cpython-312.pyc
+|   |           
+|   +---production_journal_route_records
+|   |   |   models.py
+|   |   |   repo_interface.py
+|   |   |   __init__.py
+|   |   |   
+|   |           models.cpython-312.pyc
+|   |           repo_interface.cpython-312.pyc
+|   |           __init__.cpython-312.pyc
+|   |           
+|   +---production_orders
+|   |   |   models.py
+|   |   |   repo_interface.py
+|   |   |   service.py
+|   |   |   __init__.py
+|   |   |   
+|   |           models.cpython-312.pyc
+|   |           repo_interface.cpython-312.pyc
+|   |           service.cpython-312.pyc
+|   |           __init__.cpython-312.pyc
+|   |           
+|   +---production_routes
+|   |   |   models.py
+|   |   |   repo_interface.py
+|   |   |   __init__.py
+|   |   |   
+|   |           models.cpython-312.pyc
+|   |           repo_interface.cpython-312.pyc
+|   |           __init__.cpython-312.pyc
+|   |           
+|   +---roles
+|   |   |   models.py
+|   |   |   repo_interface.py
+|   |   |   service.py
+|   |   |   __init__.py
+|   |   |   
+|   |           models.cpython-312.pyc
+|   |           repo_interface.cpython-312.pyc
+|   |           service.cpython-312.pyc
+|   |           __init__.cpython-312.pyc
+|   |           
+|   \---users
+|       |   models.py
+|       |   repo_interface.py
+|       |   service.py
+|       |   __init__.py
+|       |   
+|               models.cpython-312.pyc
+|               repo_interface.cpython-312.pyc
+|               service.cpython-312.pyc
+|               __init__.cpython-312.pyc
+|               
++---config
+|   |   .env
+|   |   actions.py
+|   |   permissions.py
+|   |   validation.py
+|   |   __init__.py
+|   |   
+|   +---validations
+|   |   |   password_validation.py
+|   |   |   
+|   |           password_validation.cpython-312.pyc
+|   |           
+|           actions.cpython-312.pyc
+|           permissions.cpython-312.pyc
+|           validation.cpython-312.pyc
+|           __init__.cpython-312.pyc
+|           
++---db
+|   |   db_exceptions.py
+|   |   session.py
+|   |   
+|   +---migrations
+|   |   |   env.py
+|   |   |   README
+|   |   |   script.py.mako
+|   |   |   
+|   |   +---versions
+|   |   |   |   0594996748cc_add_department_model_and_make_many_to_.py
+|   |   |   |   256c4b6c4353_add_prodjournalrouterecords_model.py
+|   |   |   |   28878376c89a_add_username_to_user_model.py
+|   |   |   |   2aaa25d242e5_add_production_models.py
+|   |   |   |   38d86b0fbfac_add_department_model_and_make_many_to_.py
+|   |   |   |   7490ba0f3e2c_fix_bug_with_compose_pk_in_user_model.py
+|   |   |   |   81f091e37c32_create_roles_users_and_devices_tables.py
+|   |   |   |   9dc0b3312bf6_add_full_name_field_for_user_model.py
+|   |   |   |   bd98426d85f8_make_role_ids_in_user_model_accept_to_.py
+|   |   |   |   e844693c949d_add_password_to_user_model.py
+|   |   |   |   fd94769cb13e_setup_unique_constraints.py
+|   |   |   |   
+|   |   |           0594996748cc_add_department_model_and_make_many_to_.cpython-312.pyc
+|   |   |           256c4b6c4353_add_prodjournalrouterecords_model.cpython-312.pyc
+|   |   |           28878376c89a_add_username_to_user_model.cpython-312.pyc
+|   |   |           2aaa25d242e5_add_production_models.cpython-312.pyc
+|   |   |           38d86b0fbfac_add_department_model_and_make_many_to_.cpython-312.pyc
+|   |   |           4fb9e9aec8e4_setup_unique_constraints.cpython-312.pyc
+|   |   |           61e361d82649_add_department_model_and_make_many_to_.cpython-312.pyc
+|   |   |           7490ba0f3e2c_fix_bug_with_compose_pk_in_user_model.cpython-312.pyc
+|   |   |           81f091e37c32_create_roles_users_and_devices_tables.cpython-312.pyc
+|   |   |           9dc0b3312bf6_add_full_name_field_for_user_model.cpython-312.pyc
+|   |   |           bd98426d85f8_make_role_ids_in_user_model_accept_to_.cpython-312.pyc
+|   |   |           e844693c949d_add_password_to_user_model.cpython-312.pyc
+|   |   |           fd94769cb13e_setup_unique_constraints.cpython-312.pyc
+|   |   |           
+|   |           env.cpython-312.pyc
+|   |           
+|   +---models
+|   |   |   core.py
+|   |   |   devices.py
+|   |   |   production.py
+|   |   |   production_old.py
+|   |   |   users.py
+|   |   |   __init__.py
+|   |   |   
+|   |           core.cpython-312.pyc
+|   |           devices.cpython-312.pyc
+|   |           production.cpython-312.pyc
+|   |           production_old.cpython-312.pyc
+|   |           users.cpython-312.pyc
+|   |           __init__.cpython-312.pyc
+|   |           
+|   +---repositories
+|   |   |   __init__.py
+|   |   |   
+|   |   +---postgres
+|   |   |   |   departmentRepo.py
+|   |   |   |   deviceRepo.py
+|   |   |   |   operationStageRepo.py
+|   |   |   |   productionJournalRepo.py
+|   |   |   |   productionJournalRouteRecordRepo.py
+|   |   |   |   productionJournalRouteRepo.py
+|   |   |   |   productionOrderRepo.py
+|   |   |   |   productionRouteRepo.py
+|   |   |   |   roleRepo.py
+|   |   |   |   userRepo.py
+|   |   |   |   utils.py
+|   |   |   |   
+|   |   |           departmentRepo.cpython-312.pyc
+|   |   |           deviceRepo.cpython-312.pyc
+|   |   |           devicesRepo.cpython-312.pyc
+|   |   |           operationStageRepo.cpython-312.pyc
+|   |   |           productionJournalRepo.cpython-312.pyc
+|   |   |           productionJournalRouteRecordRepo.cpython-312.pyc
+|   |   |           productionJournalRouteRepo.cpython-312.pyc
+|   |   |           productionOrderRepo.cpython-312.pyc
+|   |   |           productionRouteRepo.cpython-312.pyc
+|   |   |           roleRepo.cpython-312.pyc
+|   |   |           userRepo.cpython-312.pyc
+|   |   |           usersRepo.cpython-312.pyc
+|   |   |           utils.cpython-312.pyc
+|   |   |           workshopRepo.cpython-312.pyc
+|   |   |           
+|   |           __init__.cpython-312.pyc
+|   |           
+|           db_exceptions.cpython-312.pyc
+|           models.cpython-312.pyc
+|           session.cpython-312.pyc
+|           
++---integrations
+|   \---ERM
+|       |   service.py
+|       |   __init__.py
+|       |   
+|       +---clients
+|       |   |   mock_source_client.py
+|       |   |   soap_source_client.py
+|       |   |   
+|       |           mock_source_client.cpython-312.pyc
+|       |           
+|       +---dto
+|       |   |   aggregates.py
+|       |   |   base.py
+|       |   |   invent.py
+|       |   |   prod_bom.py
+|       |   |   prod_journal.py
+|       |   |   prod_journal_route.py
+|       |   |   prod_order.py
+|       |   |   prod_router.py
+|       |   |   
+|       |           aggregates.cpython-312.pyc
+|       |           base.cpython-312.pyc
+|       |           prod_bom.cpython-312.pyc
+|       |           prod_journal.cpython-312.pyc
+|       |           prod_journal_route.cpython-312.pyc
+|       |           prod_journal_router.cpython-312.pyc
+|       |           prod_order.cpython-312.pyc
+|       |           prod_router.cpython-312.pyc
+|       |           
+|       +---ports
+|       |   |   sink.py
+|       |   |   source.py
+|       |   |   
+|       |           sink.cpython-312.pyc
+|       |           source.cpython-312.pyc
+|       |           
+|       +---test_data
+|       |       test_data1.json
+|       |       
+|               service.cpython-312.pyc
+|               __init__.cpython-312.pyc
+|               
++---logs
+|       app.log
+|       app.log.1
+|       app.log.4
+|       
++---scripts
+|   |   create_superadmin.py
+|   |   delete_superadmin.py
+|   |   
+|           create_superadmin.cpython-312.pyc
+|           delete_superadmin.cpython-312.pyc
+|           
++---tests
+|   |   alembic.ini
+|   |   conftest.py
+|   |   testDAL.py
+|   |   utils_for_tests.py
+|   |   
+|   +---test_handlers
+|   |   +---test_auth
+|   |   |   |   test_auth.py
+|   |   |   |   
+|   |   |           test_auth.cpython-312-pytest-8.4.2.pyc
+|   |   |           
+|   |   +---test_departments
+|   |   |   |   test_create_department.py
+|   |   |   |   test_delete_department.py
+|   |   |   |   test_get_department.py
+|   |   |   |   test_update_department.py
+|   |   |   |   
+|   |   |           test_create_department.cpython-312-pytest-8.4.2.pyc
+|   |   |           test_delete_department.cpython-312-pytest-8.4.2.pyc
+|   |   |           test_get_department.cpython-312-pytest-8.4.2.pyc
+|   |   |           test_update_department.cpython-312-pytest-8.4.2.pyc
+|   |   |           
+|   |   +---test_devices
+|   |   |   |   test_create_device.py
+|   |   |   |   test_delete_device.py
+|   |   |   |   test_get_device.py
+|   |   |   |   test_update_device.py
+|   |   |   |   
+|   |   |           test_create_device.cpython-312-pytest-8.4.2.pyc
+|   |   |           test_delete_device.cpython-312-pytest-8.4.2.pyc
+|   |   |           test_get_device.cpython-312-pytest-8.4.2.pyc
+|   |   |           test_update_device.cpython-312-pytest-8.4.2.pyc
+|   |   |           
+|   |   +---test_roles
+|   |   |   |   test_create_role.py
+|   |   |   |   test_delete_role.py
+|   |   |   |   test_get_role.py
+|   |   |   |   test_update_role.py
+|   |   |   |   
+|   |   |           test_create_role.cpython-312-pytest-8.4.2.pyc
+|   |   |           test_delete_role.cpython-312-pytest-8.4.2.pyc
+|   |   |           test_get_role.cpython-312-pytest-8.4.2.pyc
+|   |   |           test_update_role.cpython-312-pytest-8.4.2.pyc
+|   |   |           
+|   |   \---test_users
+|   |       |   test_create_user.py
+|   |       |   test_delete_user.py
+|   |       |   test_get_user.py
+|   |       |   test_update_user.py
+|   |       |   
+|   |               test_create_user.cpython-312-pytest-8.4.2.pyc
+|   |               test_delete_user.cpython-312-pytest-8.4.2.pyc
+|   |               test_get_user.cpython-312-pytest-8.4.2.pyc
+|   |               test_update_user.cpython-312-pytest-8.4.2.pyc
+|   |               
+|   +---test_scripts.py
+|   |   |   test_create_superadmin.py
+|   |   |   test_delete_superadmin.py
+|   |   |   
+|   |           test_create_superadmin.cpython-312-pytest-7.2.0.pyc
+|   |           test_create_superadmin.cpython-312-pytest-8.4.2.pyc
+|   |           test_delete_superadmin.cpython-312-pytest-7.2.0.pyc
+|   |           test_delete_superadmin.cpython-312-pytest-8.4.2.pyc
+|   |           
+|           conftest.cpython-312-pytest-8.4.2.pyc
+|           testDAL.cpython-312.pyc
+|           utils_for_tests.cpython-312.pyc
+|           
++---utils
+|   |   hashing.py
+|   |   jwt.py
+|   |   make_naive.py
+|   |   
+|           hashing.cpython-312.pyc
+|           jwt.cpython-312.pyc
+|           make_naive.cpython-312.pyc
+|           
+        main.cpython-312.pyc
+        setup.cpython-312.pyc
+        

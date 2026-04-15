@@ -22,4 +22,29 @@ class Permissions(StrEnum):
     GET_DEPARTMENTS = "get_departments"
     UPDATE_DEPARTMENT = "update_department"
 
+    CREATE_OPERATION_STAGE = "create operation stage"
+    DELETE_OPERATION_STAGE = "delete operation stage"
+    GET_OPERATION_STAGES = "get operation stages"
+    UPDATE_OPERATION_STAGE = "update operation stage"
+
+    LOAD_PRODUCTION_ORDERS_TO_DB = "load_production_orders_to_db"
+
+    GET_PRODUCTION_ORDERS = "get_production_orders"
+    UPDATE_PRODUCTION_ORDERS = "update_production_orders"
+
+    GET_PRODUCTION_ORDER_ROUTES = "get_production_order_routes"
+
+    GET_PRODUCTION_ORDER_JOURNALS = "get_production_order_journals"
+
+    CREATE_PRODUCTION_ORDER_JOURNAL_ROUTES = "create_production_order_journal_routes"
+    GET_PRODUCTION_ORDER_JOURNAL_ROUTES = "get_production_order_journal_routes"
+    UPDATE_PRODUCTION_ORDER_JOURNAL_ROUTES = "update_production_order_journal_routes"
+
+    GET_PRODUCTION_ORDER_JOURNAL_ROUTE_RECORDS = (
+        "get_production_order_journal_route_records"
+    )
+    UPDATE_PRODUCTION_ORDER_JOURNAL_ROUTE_RECORDS = (
+        "update_production_order_journal_route_records"
+    )
+
     GET_LOGS = "get_logs"

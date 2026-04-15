@@ -1,8 +1,8 @@
 from typing import cast
 
-from api.core.exceptions import AppExceptions
-from api.v1.users.repo_interface import IUserRepository
-from api.v1.users.schemas import User
+from app.core.exceptions.api_exceptions import ApiExceptions
+from app.users.models import User
+from app.users.repo_interface import IUserRepository
 from utils.jwt import JWT
 
 
@@ -12,7 +12,7 @@ class AuthService:
 
     async def _authenticate_user(self, username: str, password: str) -> User:
         if not (
-            user := cast(
+            users := cast(
                 list[User],
                 await self._repo.get_by_username(
                     username,
@@ -21,10 +21,10 @@ class AuthService:
                 ),
             )
         ):
-            raise AppExceptions.unauthorized_exception("Incorrect username or password")
-        if password != user[0].password:
-            raise AppExceptions.unauthorized_exception("Incorrect username or password")
-        return user[0]
+            raise ApiExceptions.unauthorized_exception("Incorrect username or password")
+        if password != users[0].password:
+            raise ApiExceptions.unauthorized_exception("Incorrect username or password")
+        return users[0]
 
     async def create_access_token(self, username: str, password: str):
         user: User = await self._authenticate_user(username, password)

@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field, field_validator
 
-from api.core.exceptions import AppExceptions
+from app.core.exceptions.api_exceptions import ApiExceptions
 from config.validation import Validation
 
 validator = Validation()
@@ -14,7 +14,7 @@ class LoginUser(BaseModel):
     def validate_password(cls, value):
         pass_validation = validator.validate_password(value)
         if not pass_validation[0]:
-            raise AppExceptions.unauthorized_exception(pass_validation[1])
+            raise ApiExceptions.unauthorized_exception(pass_validation[1])
         return value
 
 

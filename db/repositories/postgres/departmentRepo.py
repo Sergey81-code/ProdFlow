@@ -1,10 +1,11 @@
+from typing import Any
 from uuid import UUID
 
 from sqlalchemy import and_, delete, select, update
-from api.v1.departments.repo_interface import IDepartmentRepository
+from app.departments.models import Department
+from app.departments.repo_interface import IDepartmentRepository
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.v1.departments.schemas import CreateDepartment, Department, UpdateDepartment
 from db.models import Department as DepartmentDb
 
 
@@ -12,20 +13,20 @@ class PostgresDepartmentRepo(IDepartmentRepository):
     def __init__(self, session: AsyncSession):
         self._session = session
 
-    async def create(self, department_info: CreateDepartment) -> Department:
-        user = DepartmentDb(**department_info.model_dump(exclude_none=True))
-        self._session.add(user)
+    async def create(self, department_info: dict[str, Any]) -> Department:
+        department = DepartmentDb(**department_info)
+        self._session.add(department)
         await self._session.commit()
-        await self._session.refresh(user)
-        return Department.model_validate(user)
+        await self._session.refresh(department)
+        return Department.model_validate(department)
 
     async def update(
-        self, department: Department, new_department_info: UpdateDepartment
+        self, department: Department, new_department_info: dict[str, Any]
     ) -> Department:
         stmt = (
             update(DepartmentDb)
             .where(DepartmentDb.id == department.id)
-            .values(**new_department_info.model_dump(exclude_none=True))
+            .values(**new_department_info)
             .returning(DepartmentDb)
         )
         result = await self._session.execute(stmt)

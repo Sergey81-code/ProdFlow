@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends
 from api.core.dependencies.jwt_access import permission_required
 from api.core.dependencies.services import get_device_service
 from api.v1.devices.schemas import CreateDevice, ShowDevice, UpdateDevice
-from api.v1.devices.service import DeviceService
+from app.devices.service import DeviceService
 from config.permissions import Permissions
 
 router = APIRouter()
@@ -54,7 +54,8 @@ async def create_device(
     body: CreateDevice,
     device_service: DeviceService = Depends(get_device_service),
 ) -> ShowDevice:
-    return await device_service.create_device_in_database(body)
+    device_info = body.model_dump(exclude_none=True)
+    return await device_service.create_device_in_database(device_info)
 
 
 @router.patch(
@@ -68,7 +69,8 @@ async def update_device(
     device_service: DeviceService = Depends(get_device_service),
 ) -> ShowDevice:
     device = await device_service.get_device_by_id(device_id)
-    return await device_service.update_device(device, body)
+    device_info = body.model_dump(exclude_none=True)
+    return await device_service.update_device(device, device_info)
 
 
 @router.delete(

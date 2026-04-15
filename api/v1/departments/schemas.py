@@ -1,21 +1,12 @@
 from uuid import UUID
-from typing import TYPE_CHECKING
 from pydantic import BaseModel, ConfigDict, Field
 
 
-from api.v1.users.schemas import User
+from api.v1.users.schemas import ShowUser
 
 
 class TundeModel(BaseModel):
     model_config = ConfigDict(from_attributes=True)
-
-
-class Department(TundeModel):
-    id: UUID
-    name: str
-    code: str
-
-    users: list[User] | None = None
 
 
 class ShowDepartment(TundeModel):
@@ -23,7 +14,7 @@ class ShowDepartment(TundeModel):
     name: str
     code: str
 
-    users: list[User] | None = None
+    users: list[ShowUser] | None = None
 
 
 class CreateDepartment(BaseModel):

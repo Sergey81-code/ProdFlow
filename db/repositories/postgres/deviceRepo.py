@@ -1,10 +1,11 @@
+from typing import Any
 from uuid import UUID
 
 from sqlalchemy import delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.v1.devices.repo_interface import IDeviceRepository
-from api.v1.devices.schemas import CreateDevice, Device, UpdateDevice
+from app.devices.models import Device
+from app.devices.repo_interface import IDeviceRepository
 from db.models import Device as DeviceModel
 
 
@@ -18,15 +19,20 @@ class PostgresDeviceRepo(IDeviceRepository):
         device = result.scalar_one_or_none()
         return Device.model_validate(device) if device else None
 
-    async def create(self, info: CreateDevice) -> Device:
-        device = DeviceModel(**info.model_dump(exclude_none=True))
+    async def create(self, device_info: dict[str, Any]) -> Device:
+        device = DeviceModel(**device_info)
         self._session.add(device)
         await self._session.commit()
         await self._session.refresh(device)
         return Device.model_validate(device)
 
-    async def update(self, device: Device, info: UpdateDevice) -> Device:
-        stmt = update(DeviceModel).where(DeviceModel.id == device.id).values(**info.model_dump(exclude_none=True)).returning(DeviceModel)
+    async def update(self, device: Device, device_info: dict[str, Any]) -> Device:
+        stmt = (
+            update(DeviceModel)
+            .where(DeviceModel.id == device.id)
+            .values(**device_info)
+            .returning(DeviceModel)
+        )
         result = await self._session.execute(stmt)
         await self._session.commit()
         updated_device = result.scalar_one()
@@ -47,10 +53,18 @@ class PostgresDeviceRepo(IDeviceRepository):
     ) -> list[Device]:
         if exact_match:
             pattern = name
-            filter_expr = DeviceModel.name == pattern if case_sensitive else func.lower(DeviceModel.name) == pattern.lower()
+            filter_expr = (
+                DeviceModel.name == pattern
+                if case_sensitive
+                else func.lower(DeviceModel.name) == pattern.lower()
+            )
         else:
             pattern = f"%{name}%"
-            filter_expr = DeviceModel.name.like(pattern) if case_sensitive else DeviceModel.name.ilike(pattern)
+            filter_expr = (
+                DeviceModel.name.like(pattern)
+                if case_sensitive
+                else DeviceModel.name.ilike(pattern)
+            )
 
         stmt = select(DeviceModel).where(filter_expr)
         result = await self._session.execute(stmt)
@@ -63,7 +77,9 @@ class PostgresDeviceRepo(IDeviceRepository):
         return [Device.model_validate(d) for d in devices]
 
     async def get_by_android_id(self, android_id: str) -> Device | None:
-        stmt = select(DeviceModel).where(func.lower(DeviceModel.android_id) == android_id.lower())
+        stmt = select(DeviceModel).where(
+            func.lower(DeviceModel.android_id) == android_id.lower()
+        )
         result = await self._session.execute(stmt)
         device = result.scalar_one_or_none()
         return Device.model_validate(device) if device else None

@@ -6,6 +6,9 @@ from api.core.config import get_settings
 from api.core.logging.handlers import log_router
 from api.core.logging.logging_middleware import LoggingMiddleware
 from api.core.routers import router
+from setup import configure_exceptions
+
+configure_exceptions()
 
 settings = get_settings()
 

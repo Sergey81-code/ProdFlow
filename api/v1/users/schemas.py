@@ -1,5 +1,4 @@
 from uuid import UUID
-from typing import TYPE_CHECKING
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from config.validation import Validation
@@ -11,21 +10,9 @@ class TundeModel(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class UserRole(TundeModel):
+class ShowUserRole(BaseModel):
     id: UUID
     name: str
-
-
-class User(TundeModel):
-    id: UUID
-    username: str
-    first_name: str
-    last_name: str
-    patronymic: str | None = None
-    password: str | None = None
-    employee_number: str | None = None
-    roles: list[UserRole] | None = []
-    department_id: UUID | None = None
 
 
 class ShowUser(TundeModel):
@@ -35,7 +22,7 @@ class ShowUser(TundeModel):
     last_name: str
     patronymic: str | None = None
     employee_number: str | None = None
-    roles: list[UserRole] | None = []
+    roles: list[ShowUserRole] | None = []
     password: str | None = None
     department_id: UUID | None = None
 

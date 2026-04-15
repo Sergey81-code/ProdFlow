@@ -1,10 +1,11 @@
+from typing import Any
 from uuid import UUID
 
 from sqlalchemy import delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.v1.users.repo_interface import IUserRepository
-from api.v1.users.schemas import CreateUser, UpdateUser, User
+from app.users.models import User
+from app.users.repo_interface import IUserRepository
 from db.models import Role, UserRole
 from db.models import User as UserDb
 from db.repositories.postgres.utils import escape_tsquery
@@ -20,8 +21,7 @@ class PostgresUserRepo(IUserRepository):
         user = result.unique().scalar_one_or_none()
         return User.model_validate(user) if user else None
 
-    async def create(self, info: CreateUser) -> User:
-        user_data = info.model_dump(exclude_none=True)
+    async def create(self, user_data: dict[str, Any]) -> User:
         role_ids = user_data.pop("role_ids", [])
 
         user = UserDb(**user_data)
@@ -38,8 +38,7 @@ class PostgresUserRepo(IUserRepository):
         await self._session.refresh(user)
         return User.model_validate(user)
 
-    async def update(self, user: User, info: UpdateUser) -> User:
-        user_data = info.model_dump(exclude_unset=True)
+    async def update(self, user: User, user_data: dict[str, Any]) -> User:
         role_ids = user_data.pop("role_ids", None)
 
         if user_data:

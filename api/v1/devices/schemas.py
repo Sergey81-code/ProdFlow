@@ -7,12 +7,6 @@ class TundeModel(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class Device(TundeModel):
-    id: UUID
-    name: str
-    android_id: str
-
-
 class ShowDevice(TundeModel):
     id: UUID
     name: str
